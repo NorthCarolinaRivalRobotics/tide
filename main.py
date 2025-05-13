@@ -4,14 +4,15 @@ Entry point for the tide robot framework.
 """
 
 import argparse
-import asyncio
 import sys
 import yaml
+import time
+import signal
 
 from tide.core.utils import launch_from_config
 
 
-async def main():
+def main():
     """
     Launch nodes from a configuration file.
     """
@@ -37,19 +38,23 @@ async def main():
             return 0
             
         # Launch nodes from config
-        nodes = await launch_from_config(config)
+        nodes = launch_from_config(config)
         
         print(f"Started {len(nodes)} nodes. Press Ctrl+C to exit.")
         
-        # Run until interrupted
-        await asyncio.gather(*[n.tasks[0] for n in nodes])
-        
-    except KeyboardInterrupt:
-        print("Interrupted by user")
-        # Stop all nodes
-        if 'nodes' in locals():
+        # Set up signal handler for graceful shutdown
+        def signal_handler(sig, frame):
+            print("Interrupted by user")
+            # Stop all nodes
             for node in nodes:
-                await node.stop()
+                node.stop()
+            sys.exit(0)
+            
+        signal.signal(signal.SIGINT, signal_handler)
+        
+        # Keep the main thread alive
+        while True:
+            time.sleep(1)
         
     except Exception as e:
         print(f"Error: {e}")
@@ -59,4 +64,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    sys.exit(asyncio.run(main()))
+    sys.exit(main())

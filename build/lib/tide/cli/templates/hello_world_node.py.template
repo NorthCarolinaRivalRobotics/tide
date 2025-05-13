@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+"""
+Hello World node for Tide - demonstrates basic node functionality.
+"""
+
+import time
+import json
+from datetime import datetime
+
+from tide.core.node import BaseNode
+
+class HelloWorldNode(BaseNode):
+    """
+    A simple hello world node that demonstrates the basics of Tide.
+    
+    This node periodically publishes a greeting message and the current time.
+    It works immediately without requiring any custom message types.
+    """
+    ROBOT_ID = "{robot_id}"  # Default robot ID, can be overridden in config
+    GROUP = "hello"  # Group for this node's topics
+    
+    def __init__(self, *, config=None):
+        super().__init__(config=config)
+        
+        # Configuration
+        self.message = "Hello from Tide!"
+        self.update_rate = 1.0  # Hz
+        
+        # Override from config if provided
+        if config:
+            if "message" in config:
+                self.message = config["message"]
+            if "update_rate" in config:
+                self.update_rate = config["update_rate"]
+        
+        # Set the node update rate
+        self.hz = self.update_rate
+        
+        # Count messages published
+        self.count = 0
+        
+        print(f"HelloWorldNode started for robot {self.ROBOT_ID}")
+        print(f"Press Ctrl+C to exit.")
+    
+    def step(self):
+        """Publish a hello world message."""
+        # Create a simple message as a dictionary
+        message = {
+            "count": self.count,
+            "message": self.message,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        # Serialize to JSON (Zenoh can handle strings directly)
+        json_message = json.dumps(message)
+        
+        # Publish to the "hello" topic
+        self.put("hello", json_message)
+        
+        # Print what we're sending (optional, but helpful for demonstration)
+        print(f"Published message #{self.count}: {self.message} at {message['timestamp']}")
+        
+        # Increment counter
+        self.count += 1 

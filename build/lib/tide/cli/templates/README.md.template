@@ -1,0 +1,50 @@
+# {project_name}
+
+A Tide-based robotics project that demonstrates a simple "hello world" node.
+
+## Getting Started
+
+1. Install dependencies:
+
+```bash
+uv add -r requirements.txt
+```
+
+2. Run the project:
+
+```bash
+tide up
+```
+
+Or run directly with:
+
+```bash
+python main.py
+```
+
+## Project Structure
+
+- `hello_world_node.py`: Simple example node implementation
+- `config/`: Configuration files
+- `main.py`: Project entry point
+
+## Hello World Node
+
+This project includes a simple HelloWorldNode that:
+
+1. Connects to the Zenoh network
+2. Publishes a greeting message every second
+3. Demonstrates basic Tide node functionality
+
+You can customize the message and update rate in the config.yaml file.
+
+## Next Steps
+
+Once you're familiar with the basic structure, you can:
+
+1. Add more complex node types
+2. Create custom message types 
+3. Set up subscriber nodes to process messages
+4. Customize the configuration
+
+Refer to the Tide documentation for more examples and information. 

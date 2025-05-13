@@ -1,11 +1,12 @@
 # Tide Framework Tests
 
-This directory contains comprehensive tests for the Tide framework, including:
+This directory contains tests for the Tide framework.
 
-- Unit tests for core functionality
-- Tests for message models and serialization
-- Integration tests for node communication
-- Property-based tests using Hypothesis
+## Test Structure
+
+- `test_core/`: Tests for core framework functionality
+- `test_integration/`: Integration tests between components
+- `test_models/`: Tests for model components
 
 ## Running Tests
 
@@ -15,40 +16,25 @@ To run all tests:
 uv run pytest
 ```
 
-To run a specific test module:
+To run specific test files:
 
 ```bash
 uv run pytest tests/test_core/test_node.py
 ```
 
-To run tests with verbose output:
+To run specific test classes or methods:
 
 ```bash
-uv run pytest -v
+uv run pytest tests/test_core/test_node.py::TestBaseNode::test_initialization
 ```
 
-## Test Structure
+## Writing Tests
 
-- `test_core/`: Tests for the core functionality (node, utils)
-- `test_models/`: Tests for message models and serialization
-- `test_integration/`: Tests for multi-node communication
+When writing tests:
 
-## Property-Based Testing
+1. Place tests in the appropriate directory based on what they test
+2. Use pytest fixtures from conftest.py where possible
+3. Clean up resources in your tests to avoid conflicts with other tests
+4. Use meaningful assertions that help understand failures
 
-Some tests use Hypothesis for property-based testing, which generates a diverse range of inputs to test functionality more thoroughly.
-
-These tests are marked with `@given` decorators and typically verify that certain properties hold across a range of inputs.
-
-## Test Coverage
-
-To run tests with coverage:
-
-```bash
-uv run pytest --cov=tide
-```
-
-For HTML coverage report:
-
-```bash
-uv run pytest --cov=tide --cov-report=html
-``` 
+For asynchronous code testing, prefer using proper pytest-async techniques over simple time.sleep() calls where possible. 

@@ -2,11 +2,16 @@ Metadata-Version: 2.4
 Name: tide
 Version: 0.1.0
 Summary: A Zenoh-based robotics framework with opinionated namespacing
+Author: Tide Team
 Requires-Python: >=3.12
 Description-Content-Type: text/markdown
 Requires-Dist: eclipse-zenoh>=1.3.4
+Requires-Dist: hypothesis>=6.131.15
 Requires-Dist: pydantic>=2.0.0
 Requires-Dist: pyyaml>=6.0
+Requires-Dist: rich>=13.6.0
+Dynamic: author
+Dynamic: requires-python
 
 # Tide
 
@@ -34,6 +39,7 @@ For example:
 - **Strongly-typed messages**: Uses Pydantic models for validation and serialization
 - **Pythonic + asyncio**: Single event loop per process keeps latency low
 - **Callback-based**: Register callbacks for specific topics
+- **Command-line interface**: Easily create and manage Tide projects
 
 ## Installation
 
@@ -41,7 +47,77 @@ For example:
 pip install tide
 ```
 
-## Usage
+Or with uv (recommended):
+
+```bash
+uv add tide
+```
+
+## Command-Line Interface
+
+Tide comes with a powerful CLI to help you create and manage projects.
+
+### Creating a New Project
+
+```bash
+tide init my_robot_project --robot-id robot1
+```
+
+This creates a new project directory with the following structure:
+
+```
+my_robot_project/
+├── config/
+│   └── config.yaml     # Configuration for nodes
+├── nodes/
+│   ├── robot_node.py   # Main robot control node
+│   ├── teleop_node.py  # Node for commanding the robot
+│   └── monitor_node.py # Node for monitoring state
+├── main.py             # Project entry point
+├── README.md           # Project documentation
+└── requirements.txt    # Dependencies
+```
+
+### Running Your Project
+
+To start your Tide project:
+
+```bash
+cd my_robot_project
+tide up
+```
+
+This will:
+1. Load the configuration from `config/config.yaml`
+2. Start all the defined nodes
+3. Display a table of running nodes
+
+You can specify a custom configuration file:
+
+```bash
+tide up --config path/to/custom_config.yaml
+```
+
+### Checking Node Status
+
+To discover running Tide nodes on the network:
+
+```bash
+tide status
+```
+
+This shows a list of all discovered Tide nodes, including:
+- Robot ID
+- Group
+- Topic
+
+For longer discovery times:
+
+```bash
+tide status --timeout 5.0
+```
+
+## Programming API
 
 ### Defining a Node
 
@@ -107,6 +183,58 @@ nodes:
     params:
       robot_id: "robot1"
 ```
+
+## Complete Example
+
+The generated project template includes a complete working example. Here's how the nodes work together:
+
+1. **TeleopNode** - Generates simple oscillating motion commands (simulating joystick)
+   ```python
+   async def step(self):
+       # Create sinusoidal motion pattern
+       t = time.time()
+       self.linear_vel = 0.5 * math.sin(0.2 * t)
+       self.angular_vel = 0.2 * math.cos(0.1 * t)
+       
+       # Create and publish the command
+       cmd = Twist2D(
+           linear=Vector2(x=self.linear_vel),
+           angular=self.angular_vel
+       )
+       await self.put("cmd/twist", to_zenoh_value(cmd))
+   ```
+
+2. **RobotNode** - Receives commands and simulates robot movement
+   ```python
+   def _on_cmd_vel(self, data):
+       cmd = from_zenoh_value(data, Twist2D)
+       self.linear_vel = cmd.linear.x
+       self.angular_vel = cmd.angular
+   
+   async def step(self):
+       # Simple motion model - integrate velocity
+       dt = time.time() - self.last_update
+       self.theta += self.angular_vel * dt
+       self.x += self.linear_vel * math.cos(self.theta) * dt
+       self.y += self.linear_vel * math.sin(self.theta) * dt
+       
+       # Publish the current pose
+       pose = Pose2D(x=self.x, y=self.y, theta=self.theta)
+       await self.put("state/pose2d", to_zenoh_value(pose))
+   ```
+
+3. **MonitorNode** - Displays the robot's state
+   ```python
+   def _on_pose(self, data):
+       pose = from_zenoh_value(data, Pose2D)
+       print(f"Robot pose: x={pose.x:.2f}, y={pose.y:.2f}, theta={pose.theta:.2f}")
+   ```
+
+This demonstrates:
+- Opinionated topic naming (`cmd/twist`, `state/pose2d`)
+- Callback-based architecture for handling messages
+- Strong typing with Pydantic models
+- Serialization/deserialization with Zenoh
 
 ## Common Message Types
 

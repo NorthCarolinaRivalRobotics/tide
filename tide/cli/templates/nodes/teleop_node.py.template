@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+"""
+Teleoperation node for controlling the robot.
+"""
+
+import asyncio
+import time
+import math
+from datetime import datetime
+
+from tide.core.node import BaseNode
+from tide.models.common import Twist2D, Vector2
+from tide.models.serialization import to_zenoh_value
+
+
+class TeleopNode(BaseNode):
+    """
+    Node for sending commands to the robot.
+    """
+    ROBOT_ID = "{robot_id}"
+    GROUP = "teleop"
+    
+    def __init__(self, *, config=None):
+        super().__init__(config=config)
+        
+        # Configuration
+        self.command_rate = 1.0  # Hz
+        if config and "command_rate" in config:
+            self.command_rate = config["command_rate"]
+            
+        # Override default update rate
+        self.hz = self.command_rate
+        
+        # State
+        self.linear_vel = 0.0
+        self.angular_vel = 0.0
+        
+        print(f"TeleopNode started for robot {{self.ROBOT_ID}}")
+    
+    async def step(self):
+        """Periodically send commands to the robot."""
+        # Create a command with simple oscillating motion
+        t = time.time()
+        
+        # Simple sinusoidal motion pattern
+        self.linear_vel = 0.5 * math.sin(0.2 * t)
+        self.angular_vel = 0.2 * math.cos(0.1 * t)
+        
+        # Create and publish the command
+        cmd = Twist2D(
+            linear=Vector2(x=self.linear_vel),
+            angular=self.angular_vel
+        )
+        
+        await self.put("cmd/twist", to_zenoh_value(cmd))
+        print(f"Sent command: linear={{self.linear_vel:.2f}}, angular={{self.angular_vel:.2f}}") 

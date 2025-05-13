@@ -1,2 +1,2 @@
 [console_scripts]
-tide = main:main
+tide = tide.cli:main

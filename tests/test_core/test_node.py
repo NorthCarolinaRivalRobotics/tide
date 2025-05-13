@@ -1,247 +1,130 @@
-"""
-Tests for the BaseNode class and its functionality.
-"""
-import asyncio
-import pytest
 import time
-from unittest.mock import MagicMock, patch
-
+import pytest
 from tide.core.node import BaseNode
-from tide.models import Twist2D, to_zenoh_value
 
-
-class TestNode(BaseNode):
-    """Simple test node implementation."""
-    ROBOT_ID = "testbot"
+class MockNode(BaseNode):
+    """Simple mock node implementation for testing BaseNode functionality."""
     GROUP = "test"
     
-    def __init__(self, *, config=None):
+    def __init__(self, config=None):
         super().__init__(config=config)
-        self.step_called = False
-        self.callback_called = False
-        self.callback_data = None
+        self.step_count = 0
     
-    async def step(self):
-        self.step_called = True
-    
-    def test_callback(self, data):
-        self.callback_called = True
-        self.callback_data = data
+    def step(self):
+        """Increment step counter each time step is called."""
+        self.step_count += 1
 
 
 class TestBaseNode:
-    """Tests for the BaseNode class."""
+    """Test cases for the BaseNode class."""
     
-    def test_init(self):
-        """Test node initialization."""
-        node = TestNode()
-        assert node.ROBOT_ID == "testbot"
+    def test_initialization(self):
+        """Test that a node can be initialized with proper config."""
+        config = {"robot_id": "test_robot"}
+        node = MockNode(config=config)
+        
+        assert node.ROBOT_ID == "test_robot"
         assert node.GROUP == "test"
-        assert not node.step_called
-        
-        # Test config override
-        node = TestNode(config={"robot_id": "custom"})
-        assert node.ROBOT_ID == "custom"
+        assert node.hz == 50.0  # Default value
     
-    def test_make_key(self):
-        """Test key creation with different patterns."""
-        node = TestNode()
+    def test_key_generation(self):
+        """Test that keys are properly generated."""
+        node = MockNode(config={"robot_id": "test_robot"})
         
-        # Test with GROUP
-        assert node._make_key("topic") == "/testbot/test/topic"
+        # Test normal key
+        key = "data"
+        full_key = node._make_key(key)
+        assert full_key == "test_robot/test/data"
         
-        # Test with absolute path
-        assert node._make_key("/absolute/path") == "/absolute/path"
-        
-        # Test without GROUP
-        node.GROUP = ""
-        assert node._make_key("topic") == "/testbot/topic"
+        # Test absolute key
+        abs_key = "/global/topic"
+        full_abs_key = node._make_key(abs_key)
+        assert full_abs_key == "global/topic"
     
-    @pytest.mark.asyncio
-    async def test_register_callback(self, monkeypatch):
-        """Test callback registration and invocation."""
-        node = TestNode()
+    def test_start_stop(self):
+        """Test that a node can be started and stopped."""
+        node = MockNode()
         
-        # Mock the subscribe method
-        orig_subscribe = node.subscribe
-        subscribe_called = False
+        thread = node.start()
+        assert thread.is_alive()
         
-        def mock_subscribe(key, callback=None):
-            nonlocal subscribe_called
-            subscribe_called = True
-            orig_subscribe(key, callback)
-        
-        monkeypatch.setattr(node, 'subscribe', mock_subscribe)
-        
-        # Register callback
-        node.register_callback("data", node.test_callback)
-        
-        # Check that subscribe was called
-        assert subscribe_called
-        
-        # Check callback is registered
-        key = "/testbot/test/data"
-        assert key in node._callbacks
-        assert node.test_callback in node._callbacks[key]
-        
-        # Simulate receiving data
-        mock_data = {"value": 42}
-        # We use _on_sample directly to bypass the actual Zenoh subscription
-        for sub_key, sub in node._subscribers.items():
-            if sub_key == key:
-                # Create a mock sample
-                class MockSample:
-                    def __init__(self, value):
-                        self.value = value
-                
-                # Call the callback as if Zenoh triggered it
-                node._subscribers[sub_key]._on_sample(MockSample(mock_data))
-        
-        # Check callback was called with data
-        assert node.callback_called
-        assert node.callback_data == mock_data
-    
-    @pytest.mark.asyncio
-    async def test_start_stop(self):
-        """Test starting and stopping a node."""
-        node = TestNode()
-        
-        # Start the node
-        task = node.start()
-        assert len(node.tasks) == 1
-        assert task in node.tasks
-        
-        # Let it run briefly
-        await asyncio.sleep(0.01)
-        
-        # Check that step was called
-        assert node.step_called
+        # Wait a short time to allow some steps to occur
+        time.sleep(0.1)
         
         # Stop the node
-        await node.stop()
-        assert not node._running
+        node.stop()
         
-        # Give it time to complete stopping
-        await asyncio.sleep(0.01)
+        # Wait for the thread to stop
+        thread.join(timeout=1.0)
+        assert not thread.is_alive()
         
-        # Check task status
-        for task in node.tasks:
-            assert task.done()
+        # Verify steps occurred
+        assert node.step_count > 0
     
-    @pytest.mark.asyncio
-    async def test_put_get(self, monkeypatch):
-        """Test putting and getting data."""
-        node = TestNode()
+    def test_pub_sub(self):
+        """Test that nodes can publish and subscribe to topics."""
+        # In this test, we'll have one node publish and another node subscribe
+        node_pub = MockNode(config={"robot_id": "robot1"})
+        node_sub = MockNode(config={"robot_id": "robot2"})
         
-        # Mock zenoh put and get methods
-        put_key = None
-        put_value = None
+        # Create a simple flag to verify we received data
+        received = False
         
-        async def mock_put(key, value):
-            nonlocal put_key, put_value
-            put_key = key
-            put_value = value
+        def callback(sample):
+            nonlocal received
+            received = True
         
-        async def mock_get(key):
-            class MockSamples:
-                def __init__(self, samples):
-                    self.samples = samples
-                
-                def __aiter__(self):
-                    return self
-                
-                async def __anext__(self):
-                    if not self.samples:
-                        raise StopAsyncIteration
-                    return self.samples.pop(0)
-            
-            if key == "/testbot/test/data":
-                class MockSample:
-                    def __init__(self):
-                        self.value = "test_value"
-                
-                return MockSamples([MockSample()])
-            return MockSamples([])  # Empty samples for other keys
+        # Both nodes subscribe to the same topic but with different robot IDs
+        # This creates cross-robot communication
+        node_sub.subscribe("/shared/topic", callback)
         
-        monkeypatch.setattr(node.z, 'put', mock_put)
-        monkeypatch.setattr(node.z, 'get', mock_get)
+        # Small delay to ensure subscription is registered
+        time.sleep(0.2)
         
-        # Test put
-        await node.put("data", "test_data")
-        assert put_key == "/testbot/test/data"
-        assert put_value == "test_data"
+        # Publish to the shared topic
+        node_pub.put("/shared/topic", "test_message")
         
-        # Test get
-        value = await node.get("data")
-        assert value == "test_value"
+        # Give some time for the message to be received
+        time.sleep(0.3)
         
-        # Test get with non-existent key
-        value = await node.get("nonexistent")
-        assert value is None
-    
-    @pytest.mark.asyncio
-    async def test_take(self):
-        """Test the take method."""
-        node = TestNode()
+        # Clean up
+        node_pub.stop()
+        node_sub.stop()
         
-        # Set up test data
-        key = "/testbot/test/data"
-        node._latest_values[key] = "test_value"
+        # Check if we received a message
+        assert received, "No message was received"
+
+    def test_get_take(self):
+        """Test getting and taking values."""
+        node = MockNode()
         
-        # Take the value
-        value = await node.take("data")
-        assert value == "test_value"
+        # Subscribe first to ensure we have something to capture
+        received_data = []
+        def callback(sample):
+            # Extract payload data from Zenoh Sample object
+            received_data.append(sample)
         
-        # Value should be consumed
-        assert node._latest_values[key] is None
+        node.subscribe("test_topic", callback)
         
-        # Second take should return None
-        value = await node.take("data")
-        assert value is None
+        # Put a value
+        test_value = "test_value"
+        node.put("test_topic", test_value)
         
-        # Non-existent key should return None
-        value = await node.take("nonexistent")
-        assert value is None
-    
-    @pytest.mark.asyncio
-    async def test_subscribe(self, monkeypatch):
-        """Test subscribing to topics."""
-        node = TestNode()
+        # Give some time for the message to be received
+        time.sleep(0.1)
         
-        # Mock zenoh subscribe
-        subscribe_key = None
-        subscribe_callback = None
-        class MockSubscription:
-            def __init__(self):
-                pass
-            def close(self):
-                pass
+        # Check we received data through subscription
+        assert len(received_data) > 0
         
-        def mock_subscribe(key, callback):
-            nonlocal subscribe_key, subscribe_callback
-            subscribe_key = key
-            subscribe_callback = callback
-            return MockSubscription()
+        # At this point, our BaseNode's _latest_values should have the Zenoh sample
+        # Test take which consumes the value
+        taken_value = node.take("test_topic")
+        assert taken_value is not None
+        assert hasattr(taken_value, 'payload')
         
-        monkeypatch.setattr(node.z, 'subscribe', mock_subscribe)
+        # Take again should now be None
+        empty_value = node.take("test_topic")
+        assert empty_value is None
         
-        # Test subscribe
-        callback = lambda x: x
-        node.subscribe("data", callback)
-        
-        # Check key was processed correctly
-        assert subscribe_key == "/testbot/test/data"
-        
-        # Check callback was stored
-        assert subscribe_key in node._subscribers
-        
-        # Simulate receiving data
-        class MockSample:
-            def __init__(self, value):
-                self.value = value
-        
-        # Invoke the callback
-        subscribe_callback(MockSample("test_value"))
-        
-        # Check that data was stored
-        assert node._latest_values[subscribe_key] == "test_value" 
+        # Clean up
+        node.stop() 

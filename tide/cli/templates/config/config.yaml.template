@@ -1,0 +1,15 @@
+session:
+  mode: peer  # Mesh network
+
+nodes:
+  # Ping node (publisher example)
+  - type: ping_node.PingNode  # Imports from ping_node.py
+    params:
+      robot_id: "{robot_id}"
+      update_rate: 1.0  # Hz
+      
+  # Pong node (subscriber example)  
+  - type: pong_node.PongNode  # Imports from pong_node.py  
+    params:
+      robot_id: "{robot_id}"
+      response_delay: 0.2  # seconds 

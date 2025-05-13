@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+"""
+Ping node for Tide - demonstrates basic publisher functionality.
+"""
+
+import time
+import json
+from datetime import datetime
+
+from tide.core.node import BaseNode
+
+class PingNode(BaseNode):
+    """
+    A ping node that publishes messages and waits for responses.
+    
+    This node demonstrates a simple publisher pattern by sending 'ping' messages
+    and listening for 'pong' responses.
+    """
+    ROBOT_ID = "{robot_id}"  # Default robot ID, can be overridden in config
+    GROUP = "pingpong"       # Group for this node's topics
+    
+    def __init__(self, *, config=None):
+        super().__init__(config=config)
+        
+        # Configuration
+        self.update_rate = 1.0  # Hz
+        self.received_pongs = 0
+        
+        # Override from config if provided
+        if config:
+            if "update_rate" in config:
+                self.update_rate = config["update_rate"]
+        
+        # Set the node update rate
+        self.hz = self.update_rate
+        
+        # Count messages published
+        self.ping_count = 0
+        
+        # Subscribe to pong responses
+        self.subscribe("pong", self.on_pong)
+        
+        print(f"PingNode started for robot {self.ROBOT_ID}")
+        print(f"Publishing ping messages at {self.update_rate} Hz")
+        print(f"Press Ctrl+C to exit.")
+    
+    def on_pong(self, sample):
+        """
+        Handler for pong messages.
+        
+        Args:
+            sample: The received Zenoh sample
+        """
+        try:
+            # Get payload as string directly from the Sample
+            payload_str = sample.payload.to_string()
+            
+            # Parse the JSON data
+            message = json.loads(payload_str)
+            print(f"Received pong #{message['count']} with ping_id: {message['ping_id']}")
+            self.received_pongs += 1
+        except Exception as e:
+            print(f"Error processing pong message: {e}")
+    
+    def step(self):
+        """Publish a ping message and check for responses."""
+        # Create a ping message
+        message = {
+            "count": self.ping_count,
+            "message": "ping",
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        # Serialize to JSON
+        json_message = json.dumps(message)
+        
+        # Publish to the "ping" topic
+        self.put("ping", json_message)
+        
+        # Print what we're sending
+        print(f"Published ping #{self.ping_count} at {message['timestamp']}")
+        
+        # Increment counter
+        self.ping_count += 1 

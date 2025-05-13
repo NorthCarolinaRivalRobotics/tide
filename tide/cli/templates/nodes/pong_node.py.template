@@ -1,0 +1,95 @@
+#!/usr/bin/env python3
+"""
+Pong node for Tide - demonstrates basic subscriber functionality.
+"""
+
+import time
+import json
+from datetime import datetime
+
+from tide.core.node import BaseNode
+
+class PongNode(BaseNode):
+    """
+    A pong node that responds to ping messages.
+    
+    This node demonstrates a simple subscriber pattern by listening for 'ping' messages
+    and responding with 'pong' messages.
+    """
+    ROBOT_ID = "{robot_id}"  # Default robot ID, can be overridden in config
+    GROUP = "pingpong"       # Group for this node's topics
+    
+    def __init__(self, *, config=None):
+        super().__init__(config=config)
+        
+        # Response delay (seconds)
+        self.response_delay = 0.2
+        
+        # Override from config if provided
+        if config:
+            if "response_delay" in config:
+                self.response_delay = config["response_delay"]
+        
+        # Set a higher update rate than the ping node to ensure we're responsive
+        self.hz = 10.0
+        
+        # Count messages responded to
+        self.pong_count = 0
+        
+        # Subscribe to ping messages
+        self.subscribe("ping", self.on_ping)
+        
+        print(f"PongNode started for robot {self.ROBOT_ID}")
+        print(f"Listening for ping messages")
+        print(f"Press Ctrl+C to exit.")
+    
+    def on_ping(self, sample):
+        """
+        Handler for ping messages that responds with a pong.
+        
+        Args:
+            sample: The received Zenoh sample
+        """
+        try:
+            # Get payload as string directly from the Sample
+            payload_str = sample.payload.to_string()
+            
+            # Parse the JSON data
+            ping_message = json.loads(payload_str)
+            ping_id = ping_message["count"]
+            
+            print(f"Received ping #{ping_id} at {ping_message['timestamp']}")
+            
+            # Optional: simulate some processing time
+            time.sleep(self.response_delay)
+            
+            # Create a response message
+            response = {
+                "count": self.pong_count,
+                "message": "pong",
+                "ping_id": ping_id,  # Reference to the original ping
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            # Serialize to JSON
+            json_response = json.dumps(response)
+            
+            # Publish to the "pong" topic
+            self.put("pong", json_response)
+            
+            print(f"Responded with pong #{self.pong_count} to ping #{ping_id}")
+            
+            # Increment counter
+            self.pong_count += 1
+            
+        except Exception as e:
+            print(f"Error processing ping message: {e}")
+    
+    def step(self):
+        """
+        Main processing loop.
+        
+        For the pong node, we don't need to do anything in the step function
+        since we're using a callback-based approach.
+        """
+        pass 

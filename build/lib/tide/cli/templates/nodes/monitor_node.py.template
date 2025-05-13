@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+"""
+Monitoring node for displaying robot state.
+"""
+
+import asyncio
+import time
+from datetime import datetime
+
+from tide.core.node import BaseNode
+from tide.models.common import Pose2D
+from tide.models.serialization import from_zenoh_value
+
+
+class MonitorNode(BaseNode):
+    """
+    Node for monitoring the robot's state.
+    """
+    ROBOT_ID = "{robot_id}"
+    GROUP = "monitor"
+    
+    def __init__(self, *, config=None):
+        super().__init__(config=config)
+        
+        # State variables
+        self.last_pose = None
+        self.last_pose_time = None
+        
+        # Subscribe to robot state
+        self.subscribe("state/pose2d", self._on_pose)
+        
+        print(f"MonitorNode started for robot {{self.ROBOT_ID}}")
+    
+    def _on_pose(self, data):
+        """Handle incoming pose messages."""
+        try:
+            # Convert from Zenoh data to Pose2D
+            pose = from_zenoh_value(data, Pose2D)
+            
+            # Update state
+            self.last_pose = pose
+            self.last_pose_time = time.time()
+            
+            # Display the pose
+            print(f"Robot pose: x={{pose.x:.2f}}, y={{pose.y:.2f}}, theta={{pose.theta:.2f}}")
+        except Exception as e:
+            print(f"Error processing pose: {{e}}")
+    
+    async def step(self):
+        """Main processing loop."""
+        # Check if we haven't received a pose recently
+        if self.last_pose_time is None or time.time() - self.last_pose_time > 5.0:
+            print("No robot pose received recently") 
