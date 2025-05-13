@@ -1,3 +1,13 @@
+Metadata-Version: 2.4
+Name: tide
+Version: 0.1.0
+Summary: A Zenoh-based robotics framework with opinionated namespacing
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: eclipse-zenoh>=1.3.4
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: pyyaml>=6.0
+
 # Tide
 
 A lightweight, strongly-typed framework for robotics based on [Zenoh](https://zenoh.io/), with opinionated namespacing.

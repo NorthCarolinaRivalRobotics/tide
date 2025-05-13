@@ -1,0 +1,15 @@
+session:
+  mode: peer  # Mesh network
+
+nodes:
+  - type: examples.callbacks.CallbackRobotNode
+    params:
+      robot_id: "frogbot"
+      
+  - type: examples.callbacks.CommandPublisherNode
+    params:
+      target_robot: "frogbot"
+      
+  - type: examples.callbacks.StateMonitorNode
+    params:
+      target_robot: "frogbot" 

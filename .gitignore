@@ -1,0 +1,10 @@
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.pywz
+*.pyzw
+*.jpg
+*.mp4
+*/__pycache__

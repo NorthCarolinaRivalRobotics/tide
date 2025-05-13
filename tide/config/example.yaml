@@ -1,0 +1,15 @@
+session:
+  mode: peer  # Mesh network
+
+nodes:
+  - type: examples.simple_robot.SimpleRobotNode
+    params:
+      robot_id: "frogbot"
+      
+  - type: examples.simple_robot.TeleopNode
+    params:
+      robot_id: "frogbot"
+      
+  - type: examples.simple_robot.MonitorNode
+    params:
+      robot_id: "frogbot" 
