@@ -38,6 +38,13 @@ def main():
     init_config_parser.add_argument('--robot-id', default='myrobot', help='Default robot ID to use')
     init_config_parser.add_argument('--force', action='store_true', help='Overwrite existing file')
     
+    # init-pingpong command
+    init_pingpong_parser = subparsers.add_parser('init-pingpong', help='Create ping-pong example nodes')
+    init_pingpong_parser.add_argument('--output-dir', default='.', help='Directory to create the nodes in')
+    init_pingpong_parser.add_argument('--robot-id', default='myrobot', help='Default robot ID to use')
+    init_pingpong_parser.add_argument('--force', action='store_true', help='Overwrite existing files')
+    init_pingpong_parser.add_argument('--create-config', action='store_true', help='Create a config file for the examples')
+    
     # up command
     up_parser = subparsers.add_parser('up', help='Run a Tide project')
     up_parser.add_argument('--config', default='config/config.yaml', help='Path to configuration file')
@@ -70,7 +77,7 @@ def main():
         elif args.command == 'init-pingpong':
             result = cmd_init_pingpong(args)
             sys.exit(result)
-            
+                    
         elif args.command == 'up':
             result = cmd_up(args)
             sys.exit(result)

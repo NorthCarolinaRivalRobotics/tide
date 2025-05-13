@@ -22,10 +22,15 @@ def cmd_init_pingpong(args) -> int:
     force = args.force
     
     # Determine where to put the nodes
-    if args.output_dir:
+    if hasattr(args, 'output_dir') and args.output_dir:
         output_dir = Path(args.output_dir)
     else:
-        output_dir = Path(".")
+        # Default to using the project_name as the output directory if available,
+        # otherwise use current directory
+        if hasattr(args, 'project_name') and args.project_name:
+            output_dir = Path(args.project_name)
+        else:
+            output_dir = Path(".")
     
     # Make sure the directory exists
     os.makedirs(output_dir, exist_ok=True)
@@ -53,7 +58,7 @@ def cmd_init_pingpong(args) -> int:
         return 1
     
     # Create config file if requested
-    if args.create_config:
+    if hasattr(args, 'create_config') and args.create_config:
         config_path = output_dir / "config" / "pingpong_config.yaml"
         os.makedirs(os.path.dirname(config_path), exist_ok=True)
         
@@ -128,7 +133,7 @@ robots:
     
     # Print instructions
     console.print("\n[bold green]Ping-Pong example created successfully![/bold green]")
-    if args.create_config:
+    if hasattr(args, 'create_config') and args.create_config:
         console.print("\nYou can run your ping-pong example with:")
         console.print(f"[cyan]   tide up --config {config_path.relative_to(Path.cwd())}[/cyan]")
     else:

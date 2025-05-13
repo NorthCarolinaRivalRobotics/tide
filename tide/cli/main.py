@@ -7,7 +7,7 @@ import argparse
 
 from tide import __version__
 from tide.cli.utils import print_banner
-from tide.cli.commands import cmd_init, cmd_up, cmd_status, cmd_init_config, cmd_init_pingpong
+from tide.cli.commands import cmd_up, cmd_status, cmd_init_pingpong
 
 def main():
     """Entry point for the Tide CLI."""
@@ -60,17 +60,9 @@ def main():
     # Execute command
     try:
         if args.command == 'init':
-            result = cmd_init(args)
-            sys.exit(result)
-            
-        elif args.command == 'init-config':
-            result = cmd_init_config(args)
-            sys.exit(result)
-            
-        elif args.command == 'init-pingpong':
             result = cmd_init_pingpong(args)
             sys.exit(result)
-            
+                    
         elif args.command == 'up':
             result = cmd_up(args)
             sys.exit(result)
