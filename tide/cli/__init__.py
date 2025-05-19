@@ -2,6 +2,6 @@
 Tide CLI module.
 """
 
-from tide.cli.main import main
+from tide.cli.main import main, create_parser
 
-__all__ = ['main'] 
+__all__ = ['main', 'create_parser']

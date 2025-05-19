@@ -8,7 +8,7 @@ import yaml
 import signal
 import traceback
 import sys
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 from rich.table import Table
 
@@ -17,7 +17,7 @@ from tide.config import load_config, TideConfig
 from tide.cli.utils import console
 from tide.core.node import BaseNode
 
-def cmd_up(args) -> int:
+def cmd_up(args, *, run_duration: Optional[float] = None) -> int:
     """
     Run a Tide project.
     
@@ -102,9 +102,14 @@ def cmd_up(args) -> int:
         # Set up signal handler for clean shutdown
         signal.signal(signal.SIGINT, shutdown_handler)
         
+        start_time = time.time()
+
         # Keep the main thread alive
         while True:
             time.sleep(1)
+            if run_duration is not None and (time.time() - start_time) >= run_duration:
+                shutdown_handler()
+                break
         
     except ModuleNotFoundError as e:
         console.print(f"\n[bold red]Error:[/bold red] {e}")
