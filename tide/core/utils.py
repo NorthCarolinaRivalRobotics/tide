@@ -2,11 +2,12 @@ import importlib
 import importlib.util
 import math
 import os
-from typing import Any, Dict, List, Type, Tuple, Optional
+from typing import Any, Dict, List, Mapping, Type, Tuple, Optional, Union
 
 from tide.core.geometry import Quaternion
 
 from tide.core.node import BaseNode
+from tide.config import TideConfig
 
 def import_class(class_path: str) -> Type:
     """
@@ -57,28 +58,19 @@ def create_node(node_type: str, params: Dict[str, Any] = None) -> BaseNode:
     node_class = import_class(node_type)
     return node_class(config=params)
 
-def launch_from_config(config: Dict[str, Any]) -> List[BaseNode]:
-    """
-    Launch a set of nodes from a configuration dictionary.
-    
-    Args:
-        config: Dictionary with session and node configurations
-        
-    Returns:
-        List of instantiated nodes
-    """
-    nodes = []
-    
-    # Configure session
-    session_config = config.get("session", {})
-    # TODO: Apply session configuration
-    
+def launch_from_config(config: Union[TideConfig, Mapping[str, Any]]) -> List[BaseNode]:
+    """Launch a set of nodes from a configuration object or mapping."""
+
+    cfg = config if isinstance(config, TideConfig) else TideConfig.model_validate(config)
+
+    nodes: List[BaseNode] = []
+
+    # Configure session (placeholder for future extensions)
+    _session_cfg = cfg.session
+
     # Create nodes
-    for node_config in config.get("nodes", []):
-        node_type = node_config.get("type")
-        params = node_config.get("params", {})
-        
-        node = create_node(node_type, params)
+    for node_cfg in cfg.nodes:
+        node = create_node(node_cfg.type, node_cfg.params)
         node.start()
         nodes.append(node)
         

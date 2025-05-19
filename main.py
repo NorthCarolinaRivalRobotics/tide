@@ -10,6 +10,7 @@ import time
 import signal
 
 from tide.core.utils import launch_from_config
+from tide.config import load_config
 
 
 def main():
@@ -26,14 +27,13 @@ def main():
     
     try:
         # Load configuration
-        with open(args.config_file, 'r') as f:
-            config = yaml.safe_load(f)
+        config = load_config(args.config_file)
             
         if args.dry_run:
             print("Dry run - checking configuration...")
-            print(f"Session mode: {config.get('session', {}).get('mode', 'default')}")
-            for i, node_config in enumerate(config.get('nodes', [])):
-                print(f"Node {i+1}: {node_config.get('type', '?')} - {node_config.get('params', {})}")
+            print(f"Session mode: {config.session.mode}")
+            for i, node_cfg in enumerate(config.nodes):
+                print(f"Node {i+1}: {node_cfg.type} - {node_cfg.params}")
             print("Configuration looks valid!")
             return 0
             

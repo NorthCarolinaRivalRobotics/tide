@@ -13,6 +13,7 @@ from typing import Dict, Any, List
 from rich.table import Table
 
 from tide.core.utils import launch_from_config
+from tide.config import load_config, TideConfig
 from tide.cli.utils import console
 from tide.core.node import BaseNode
 
@@ -35,24 +36,23 @@ def cmd_up(args) -> int:
     
     # Load configuration
     try:
-        with open(config_file, 'r') as f:
-            config = yaml.safe_load(f)
+        config = load_config(config_file)
     except Exception as e:
         console.print(f"[bold red]Error:[/bold red] Failed to load configuration: {e}")
         return 1
     
     # Show info about the configuration
     console.print("\n[bold]Configuration loaded:[/bold]")
-    console.print(f"Session mode: [cyan]{config.get('session', {}).get('mode', 'default')}[/cyan]")
+    console.print(f"Session mode: [cyan]{config.session.mode}[/cyan]")
     
     node_table = Table(show_header=True, header_style="bold cyan")
     node_table.add_column("Node")
     node_table.add_column("Type")
     node_table.add_column("Robot ID")
     
-    for i, node_config in enumerate(config.get('nodes', [])):
-        node_type = node_config.get('type', '?')
-        robot_id = node_config.get('params', {}).get('robot_id', '?')
+    for i, node_config in enumerate(config.nodes):
+        node_type = node_config.type
+        robot_id = node_config.params.get('robot_id', '?')
         node_table.add_row(
             f"Node {i+1}",
             node_type,
