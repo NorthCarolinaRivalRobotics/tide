@@ -135,11 +135,14 @@ robots:
     console.print("\n[bold green]Ping-Pong example created successfully![/bold green]")
     if hasattr(args, 'create_config') and args.create_config:
         console.print("\nYou can run your ping-pong example with:")
-        console.print(f"[cyan]   tide up --config {config_path.relative_to(Path.cwd())}[/cyan]")
+        rel_config = os.path.relpath(config_path, Path.cwd())
+        console.print(f"[cyan]   tide up --config {rel_config}[/cyan]")
     else:
         console.print("\nTo run the nodes manually:")
         console.print(f"[cyan]   # Run these in separate terminals:[/cyan]")
-        console.print(f"[cyan]   python {ping_path.relative_to(Path.cwd())}[/cyan]")
-        console.print(f"[cyan]   python {pong_path.relative_to(Path.cwd())}[/cyan]")
+        rel_ping = os.path.relpath(ping_path, Path.cwd())
+        rel_pong = os.path.relpath(pong_path, Path.cwd())
+        console.print(f"[cyan]   python {rel_ping}[/cyan]")
+        console.print(f"[cyan]   python {rel_pong}[/cyan]")
     
     return 0 
