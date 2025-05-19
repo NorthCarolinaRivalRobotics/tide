@@ -136,12 +136,11 @@ class MyRobotNode(BaseNode):
 ```python
 import asyncio
 from tide.core.utils import launch_from_config
-import yaml
+from tide.config import load_config
 
 async def main():
     # Load configuration
-    with open('config.yaml', 'r') as f:
-        config = yaml.safe_load(f)
+    config = load_config('config.yaml')
     
     # Launch nodes
     nodes = await launch_from_config(config)
@@ -168,6 +167,8 @@ nodes:
     params:
       robot_id: "robot1"
 ```
+
+See `docs/config_spec.md` for the formal configuration specification.
 
 ## Complete Example
 

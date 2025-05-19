@@ -192,6 +192,8 @@ nodes:
       robot_id: "robot1"
 ```
 
+See [config_spec.md](config_spec.md) for a full description of the configuration format.
+
 ### nodes/
 
 This directory contains your node implementations:
@@ -210,11 +212,11 @@ import asyncio
 import sys
 import yaml
 from tide.core.utils import launch_from_config
+from tide.config import load_config
 
 async def main():
     # Load configuration
-    with open("config/config.yaml", "r") as f:
-        config = yaml.safe_load(f)
+    config = load_config("config/config.yaml")
         
     # Launch nodes
     nodes = await launch_from_config(config)
@@ -334,12 +336,11 @@ tide init tide_templates
 
 ```python
 from tide.core.utils import launch_from_config
-import yaml
+from tide.config import load_config
 
 async def start_tide_nodes():
     # Load Tide configuration
-    with open("config/tide_config.yaml", "r") as f:
-        config = yaml.safe_load(f)
+    config = load_config("config/tide_config.yaml")
         
     # Launch Tide nodes
     nodes = await launch_from_config(config)
