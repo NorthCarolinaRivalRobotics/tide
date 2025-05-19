@@ -9,45 +9,60 @@ from tide import __version__
 from tide.cli.utils import print_banner
 from tide.cli.commands import cmd_up, cmd_status, cmd_init_pingpong
 
-def main():
-    """Entry point for the Tide CLI."""
-    # Create main parser
+
+def create_parser() -> argparse.ArgumentParser:
+    """Create the argument parser used by the Tide CLI."""
     parser = argparse.ArgumentParser(
         description="Tide Robotics Framework CLI",
-        formatter_class=argparse.RawDescriptionHelpFormatter
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    
+
     parser.add_argument(
-        '--version',
-        action='version',
-        version=f'Tide {__version__}'
+        "--version",
+        action="version",
+        version=f"Tide {__version__}",
     )
-    
-    # Create subparsers for commands
-    subparsers = parser.add_subparsers(dest='command', help='Command to run')
-    
-    # init command
-    init_parser = subparsers.add_parser('init', help='Initialize a new Tide project')
-    init_parser.add_argument('project_name', help='Name of the project to create')
-    init_parser.add_argument('--robot-id', default='myrobot', help='Default robot ID to use')
-    init_parser.add_argument('--force', action='store_true', help='Overwrite existing project')
-    
-    # init-config command
-    init_config_parser = subparsers.add_parser('init-config', help='Create a default configuration file')
-    init_config_parser.add_argument('--output', default='config/config.yaml', help='Output path for the configuration file')
-    init_config_parser.add_argument('--robot-id', default='myrobot', help='Default robot ID to use')
-    init_config_parser.add_argument('--force', action='store_true', help='Overwrite existing file')
-    
-    # up command
-    up_parser = subparsers.add_parser('up', help='Run a Tide project')
-    up_parser.add_argument('--config', default='config/config.yaml', help='Path to configuration file')
-    
-    # status command
-    status_parser = subparsers.add_parser('status', help='Show status of running Tide nodes')
-    status_parser.add_argument('--timeout', type=float, default=2.0, help='Discovery timeout in seconds')
-    
-    # Parse arguments
-    args = parser.parse_args()
+
+    subparsers = parser.add_subparsers(dest="command", help="Command to run")
+
+    init_parser = subparsers.add_parser(
+        "init", help="Initialize a new Tide project"
+    )
+    init_parser.add_argument("project_name", help="Name of the project to create")
+    init_parser.add_argument(
+        "--robot-id", default="myrobot", help="Default robot ID to use"
+    )
+    init_parser.add_argument("--force", action="store_true", help="Overwrite existing project")
+
+    init_config_parser = subparsers.add_parser(
+        "init-config", help="Create a default configuration file"
+    )
+    init_config_parser.add_argument(
+        "--output", default="config/config.yaml", help="Output path for the configuration file"
+    )
+    init_config_parser.add_argument(
+        "--robot-id", default="myrobot", help="Default robot ID to use"
+    )
+    init_config_parser.add_argument("--force", action="store_true", help="Overwrite existing file")
+
+    up_parser = subparsers.add_parser("up", help="Run a Tide project")
+    up_parser.add_argument(
+        "--config", default="config/config.yaml", help="Path to configuration file"
+    )
+
+    status_parser = subparsers.add_parser(
+        "status", help="Show status of running Tide nodes"
+    )
+    status_parser.add_argument(
+        "--timeout", type=float, default=2.0, help="Discovery timeout in seconds"
+    )
+
+    return parser
+
+def main(argv=None):
+    """Entry point for the Tide CLI."""
+    parser = create_parser()
+    args = parser.parse_args(argv)
     
     # Display banner
     print_banner()

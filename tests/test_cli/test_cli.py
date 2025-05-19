@@ -1,0 +1,57 @@
+import argparse
+from types import SimpleNamespace
+from unittest import mock
+
+import pytest
+
+from tide.cli.main import create_parser
+from tide.cli.commands.init_pingpong import cmd_init_pingpong
+from tide.cli.commands.init_config import cmd_init_config
+from tide.cli.commands.status import cmd_status
+from tide.cli.commands.up import cmd_up
+
+
+def test_parser_parses_init():
+    parser = create_parser()
+    args = parser.parse_args(['init', 'proj', '--robot-id', 'r2'])
+    assert args.command == 'init'
+    assert args.project_name == 'proj'
+    assert args.robot_id == 'r2'
+
+
+def test_cmd_init_pingpong(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    args = argparse.Namespace(robot_id='r1', force=False, output_dir=str(tmp_path))
+    result = cmd_init_pingpong(args)
+    assert result == 0
+    assert (tmp_path / 'ping_node.py').exists()
+    assert (tmp_path / 'pong_node.py').exists()
+
+
+def test_cmd_init_config(tmp_path):
+    cfg = tmp_path / 'config.yaml'
+    args = argparse.Namespace(output=str(cfg), robot_id='r1', force=False, include_node=False)
+    result = cmd_init_config(args)
+    assert result == 0
+    assert cfg.exists()
+
+
+def test_cmd_status(monkeypatch, capsys):
+    monkeypatch.setattr('tide.cli.commands.status.discover_nodes', lambda timeout: [{'robot_id': 'r', 'group': 'g', 'topic': 't'}])
+    args = argparse.Namespace(timeout=0.1)
+    result = cmd_status(args)
+    assert result == 0
+    captured = capsys.readouterr()
+    assert 'r' in captured.out
+
+
+def test_cmd_up(monkeypatch, tmp_path):
+    cfg_file = tmp_path / 'config.yaml'
+    cfg_file.write_text('session:\n  mode: peer\nnodes: []\n')
+    args = argparse.Namespace(config=str(cfg_file))
+
+    dummy_node = SimpleNamespace(threads=[object()], stop=mock.Mock())
+    monkeypatch.setattr('tide.cli.commands.up.launch_from_config', lambda cfg: [dummy_node])
+    with pytest.raises(SystemExit):
+        cmd_up(args, run_duration=0.1)
+    dummy_node.stop.assert_called()
