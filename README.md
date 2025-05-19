@@ -16,7 +16,7 @@ For example:
 - `/frogbot/cmd/twist` - Command velocity for the "frogbot" robot
 - `/frogbot/state/pose2d` - 2D pose state for the robot
 - `/frogbot/sensor/lidar` - Lidar data from the robot
-See [docs/namespacing.md](docs/namespacing.md) for a full list of reserved namespaces.
+See [docs/namespacing.md](docs/namespacing.md) for a full list of reserved namespaces.  The `tide.namespaces` module exposes enums for these topics so you don't have to hardcode strings.
 
 ## Features
 
@@ -110,6 +110,7 @@ tide status --timeout 5.0
 ```python
 from tide.core.node import BaseNode
 from tide.models import Twist2D, Pose2D, to_zenoh_value
+from tide import CmdTopic, StateTopic
 
 class MyRobotNode(BaseNode):
     ROBOT_ID = "myrobot"  # Your robot's unique ID
@@ -118,8 +119,8 @@ class MyRobotNode(BaseNode):
     def __init__(self, *, config=None):
         super().__init__(config=config)
         
-        # Subscribe to command velocity
-        self.subscribe("cmd/twist", self._on_cmd_vel)
+        # Subscribe to command velocity using the reserved enum
+        self.subscribe(CmdTopic.TWIST.value, self._on_cmd_vel)
     
     def _on_cmd_vel(self, data):
         # Process command velocity message
@@ -129,7 +130,7 @@ class MyRobotNode(BaseNode):
         # Called at the node's update rate
         # Publish robot state
         pose = Pose2D(x=1.0, y=2.0, theta=0.5)
-        self.put("state/pose2d", to_zenoh_value(pose))
+        self.put(StateTopic.POSE2D.value, to_zenoh_value(pose))
 ```
 
 ### Launching Nodes
@@ -194,7 +195,7 @@ The generated project template includes a complete working example. Here's how t
            linear=Vector2(x=self.linear_vel),
            angular=self.angular_vel
        )
-       self.put("cmd/twist", to_zenoh_value(cmd))
+       self.put(CmdTopic.TWIST.value, to_zenoh_value(cmd))
    ```
 
 2. **RobotNode** - Receives commands and simulates robot movement
@@ -213,7 +214,7 @@ The generated project template includes a complete working example. Here's how t
 
        # Publish the current pose
        pose = Pose2D(x=self.x, y=self.y, theta=self.theta)
-       self.put("state/pose2d", to_zenoh_value(pose))
+       self.put(StateTopic.POSE2D.value, to_zenoh_value(pose))
    ```
 
 3. **MonitorNode** - Displays the robot's state

@@ -76,3 +76,22 @@ Because all topics share the same `{robot_id}/{group}/{topic}` pattern,
 utilities can discover information with wildcards. For example, querying
 `*/state/*` finds all state topics for all robots.
 
+## Python Helpers
+
+Tide provides enums representing all reserved groups and topics in `tide.namespaces`. These are also re-exported from the top-level `tide` package for convenience.
+
+```python
+from tide import CmdTopic, StateTopic, SensorTopic, sensor_camera_rgb
+
+# Subscribe to a reserved topic using the enum value
+self.subscribe(CmdTopic.TWIST.value, self._on_cmd_vel)
+
+# Publish state updates using the enum value
+self.put(StateTopic.POSE2D.value, to_zenoh_value(pose))
+
+# Build camera topics dynamically
+camera_key = sensor_camera_rgb("front")
+self.put(camera_key, to_zenoh_value(image))
+```
+
+Mappings such as `CMD_TYPES`, `STATE_TYPES`, and `SENSOR_TYPES` allow lookup of the expected message type for each reserved topic.
