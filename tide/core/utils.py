@@ -4,6 +4,8 @@ import math
 import os
 from typing import Any, Dict, List, Type, Tuple, Optional
 
+from tide.core.geometry import Quaternion
+
 from tide.core.node import BaseNode
 
 def import_class(class_path: str) -> Type:
@@ -82,7 +84,7 @@ def launch_from_config(config: Dict[str, Any]) -> List[BaseNode]:
         
     return nodes
 
-def quaternion_from_euler(roll: float, pitch: float, yaw: float) -> Dict[str, float]:
+def quaternion_from_euler(roll: float, pitch: float, yaw: float) -> Quaternion:
     """
     Convert Euler angles to quaternion.
     
@@ -92,7 +94,7 @@ def quaternion_from_euler(roll: float, pitch: float, yaw: float) -> Dict[str, fl
         yaw: Rotation around Z axis (radians)
         
     Returns:
-        Dictionary with quaternion components {x, y, z, w}
+        Quaternion instance representing the rotation
     """
     cy = math.cos(yaw * 0.5)
     sy = math.sin(yaw * 0.5)
@@ -101,26 +103,24 @@ def quaternion_from_euler(roll: float, pitch: float, yaw: float) -> Dict[str, fl
     cr = math.cos(roll * 0.5)
     sr = math.sin(roll * 0.5)
     
-    q = {
-        "w": cy * cp * cr + sy * sp * sr,
-        "x": cy * cp * sr - sy * sp * cr,
-        "y": sy * cp * sr + cy * sp * cr,
-        "z": sy * cp * cr - cy * sp * sr
-    }
-    
-    return q
+    return Quaternion(
+        x=cy * cp * sr - sy * sp * cr,
+        y=sy * cp * sr + cy * sp * cr,
+        z=sy * cp * cr - cy * sp * sr,
+        w=cy * cp * cr + sy * sp * sr,
+    )
 
-def euler_from_quaternion(q: Dict[str, float]) -> Tuple[float, float, float]:
+def euler_from_quaternion(q: Quaternion) -> Tuple[float, float, float]:
     """
     Convert quaternion to Euler angles.
     
     Args:
-        q: Dictionary with quaternion components {x, y, z, w}
+        q: Quaternion instance
         
     Returns:
         Tuple of (roll, pitch, yaw) in radians
     """
-    x, y, z, w = q["x"], q["y"], q["z"], q["w"]
+    x, y, z, w = q.x, q.y, q.z, q.w
     
     # Roll (x-axis rotation)
     sinr_cosp = 2 * (w * x + y * z)
