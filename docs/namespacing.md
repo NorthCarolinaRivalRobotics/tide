@@ -12,7 +12,9 @@ interoperability between nodes:
 * **topic** – specific message name
 
 The following groups and topics are reserved for common functionality.
-Users are free to create additional groups and topics as needed.
+These top-level groups are represented by the `Group` enum in
+`tide.namespaces`. Users are free to create additional groups and topics
+as needed.
 
 ## Command Topics (`cmd`)
 
@@ -81,7 +83,8 @@ utilities can discover information with wildcards. For example, querying
 Tide provides enums representing all reserved groups and topics in `tide.namespaces`. These are also re-exported from the top-level `tide` package for convenience.
 
 ```python
-from tide import CmdTopic, StateTopic, SensorTopic, sensor_camera_rgb
+from tide import Group, CmdTopic, StateTopic, SensorTopic,
+    sensor_camera_rgb, sensor_camera_depth
 
 # Subscribe to a reserved topic using the enum value
 self.subscribe(CmdTopic.TWIST.value, self._on_cmd_vel)
@@ -90,8 +93,12 @@ self.subscribe(CmdTopic.TWIST.value, self._on_cmd_vel)
 self.put(StateTopic.POSE2D.value, to_zenoh_value(pose))
 
 # Build camera topics dynamically
-camera_key = sensor_camera_rgb("front")
-self.put(camera_key, to_zenoh_value(image))
+rgb_key = sensor_camera_rgb("front")
+self.put(rgb_key, to_zenoh_value(rgb_image))
+
+# Depth images are supported with a helper as well
+depth_key = sensor_camera_depth("front")
+self.put(depth_key, to_zenoh_value(depth_image))
 ```
 
 Mappings such as `CMD_TYPES`, `STATE_TYPES`, and `SENSOR_TYPES` allow lookup of the expected message type for each reserved topic.

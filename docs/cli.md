@@ -8,6 +8,7 @@ The Tide CLI provides a set of commands to help you create, run, and manage Tide
 - [Commands](#commands)
   - [init](#init-command)
   - [init-config](#init-config-command)
+  - [init-pingpong](#init-pingpong-command)
   - [up](#up-command)
   - [status](#status-command)
 - [Project Structure](#project-structure)
@@ -79,6 +80,7 @@ tide init-config [options]
 - `--output OUTPUT`: Output path for the configuration file (default: "config/config.yaml")
 - `--robot-id ROBOT_ID`: Specify the default robot ID (default: "myrobot")
 - `--force`: Overwrite existing file if it exists
+- `--include-node`: Also create ping and pong example nodes
 
 #### Examples
 
@@ -98,6 +100,43 @@ Create a configuration file at a custom location:
 
 ```bash
 tide init-config --output my_config.yaml
+```
+
+Create a configuration file and include example nodes:
+
+```bash
+tide init-config --include-node
+```
+
+### `init-pingpong` Command
+
+The `init-pingpong` command generates example ping and pong nodes that
+communicate with each other. It can optionally create a configuration
+file to run the examples with `tide up`.
+
+```bash
+tide init-pingpong [options]
+```
+
+#### Options
+
+- `--output-dir DIR`: Directory to create the nodes in (default: ".")
+- `--robot-id ROBOT_ID`: Default robot ID to use (default: "myrobot")
+- `--force`: Overwrite existing files
+- `--create-config`: Create a config file for the examples
+
+#### Examples
+
+Create example nodes in the current directory:
+
+```bash
+tide init-pingpong
+```
+
+Create nodes in a custom directory and generate a config file:
+
+```bash
+tide init-pingpong --output-dir examples --create-config
 ```
 
 ### `up` Command
