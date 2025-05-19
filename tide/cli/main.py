@@ -7,7 +7,13 @@ import argparse
 
 from tide import __version__
 from tide.cli.utils import print_banner
-from tide.cli.commands import cmd_up, cmd_status, cmd_init_pingpong
+from tide.cli.commands import (
+    cmd_init,
+    cmd_up,
+    cmd_status,
+    cmd_init_config,
+    cmd_init_pingpong,
+)
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -44,6 +50,27 @@ def create_parser() -> argparse.ArgumentParser:
         "--robot-id", default="myrobot", help="Default robot ID to use"
     )
     init_config_parser.add_argument("--force", action="store_true", help="Overwrite existing file")
+    init_config_parser.add_argument(
+        "--include-node",
+        action="store_true",
+        help="Also create ping and pong example nodes",
+    )
+
+    init_pingpong_parser = subparsers.add_parser(
+        "init-pingpong", help="Create ping-pong example nodes"
+    )
+    init_pingpong_parser.add_argument(
+        "--output-dir", default=".", help="Directory to create the nodes in"
+    )
+    init_pingpong_parser.add_argument(
+        "--robot-id", default="myrobot", help="Default robot ID to use"
+    )
+    init_pingpong_parser.add_argument(
+        "--force", action="store_true", help="Overwrite existing files"
+    )
+    init_pingpong_parser.add_argument(
+        "--create-config", action="store_true", help="Create a config file for the examples"
+    )
 
     up_parser = subparsers.add_parser("up", help="Run a Tide project")
     up_parser.add_argument(
@@ -75,13 +102,21 @@ def main(argv=None):
     # Execute command
     try:
         if args.command == 'init':
+            result = cmd_init(args)
+            sys.exit(result)
+
+        elif args.command == 'init-config':
+            result = cmd_init_config(args)
+            sys.exit(result)
+
+        elif args.command == 'init-pingpong':
             result = cmd_init_pingpong(args)
             sys.exit(result)
-                    
+
         elif args.command == 'up':
             result = cmd_up(args)
             sys.exit(result)
-            
+
         elif args.command == 'status':
             result = cmd_status(args)
             sys.exit(result)
