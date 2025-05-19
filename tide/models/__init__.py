@@ -22,7 +22,6 @@ from tide.models.serialization import (
 )
 
 from tide.models.robot import (
-    RobotType,
     SensorType,
     SensorConfig,
     ActuatorConfig,
@@ -53,7 +52,6 @@ __all__ = [
     'from_zenoh_value',
     
     # Robot configuration
-    'RobotType',
     'SensorType',
     'SensorConfig',
     'ActuatorConfig',

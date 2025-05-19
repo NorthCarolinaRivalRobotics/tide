@@ -1,5 +1,4 @@
 from models.robot import (
-    RobotType,
     SensorType,
     SensorConfig,
     ActuatorConfig,
@@ -8,7 +7,6 @@ from models.robot import (
 )
 
 __all__ = [
-    'RobotType',
     'SensorType',
     'SensorConfig',
     'ActuatorConfig',

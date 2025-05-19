@@ -10,12 +10,6 @@ except ImportError:
     Field = lambda *args, **kwargs: None  # noqa
 
 
-class RobotType(str, Enum):
-    """Types of supported robots."""
-    DIFFERENTIAL = "differential"
-    ACKERMANN = "ackermann"
-    OMNI = "omnidirectional"
-    MANIPULATOR = "manipulator"
 
 
 class SensorType(str, Enum):
@@ -48,7 +42,7 @@ class ActuatorConfig(BaseModel):
 class RobotConfig(BaseModel):
     """Configuration for a robot."""
     name: str
-    type: RobotType
+    type: str
     description: Optional[str] = None
     sensors: List[SensorConfig] = Field(default_factory=list)
     actuators: List[ActuatorConfig] = Field(default_factory=list)
