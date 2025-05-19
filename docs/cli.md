@@ -208,34 +208,35 @@ The entry point for your project:
 
 ```python
 #!/usr/bin/env python3
-import asyncio
 import sys
 import yaml
+import time
 from tide.core.utils import launch_from_config
 from tide.config import load_config
 
-async def main():
+def main():
     # Load configuration
     config = load_config("config/config.yaml")
-        
+
     # Launch nodes
-    nodes = await launch_from_config(config)
-    
+    nodes = launch_from_config(config)
+
     try:
         print(f"Started {len(nodes)} nodes. Press Ctrl+C to exit.")
-        await asyncio.gather(*[n.tasks[0] for n in nodes])
+        while True:
+            time.sleep(1)
     except KeyboardInterrupt:
         print("Interrupted by user")
         for node in nodes:
-            await node.stop()
+            node.stop()
     except Exception as e:
         print(f"Error: {e}")
         return 1
-    
+
     return 0
 
 if __name__ == "__main__":
-    sys.exit(asyncio.run(main()))
+    sys.exit(main())
 ```
 
 ## Example Workflows
@@ -338,12 +339,12 @@ tide init tide_templates
 from tide.core.utils import launch_from_config
 from tide.config import load_config
 
-async def start_tide_nodes():
+def start_tide_nodes():
     # Load Tide configuration
     config = load_config("config/tide_config.yaml")
-        
+
     # Launch Tide nodes
-    nodes = await launch_from_config(config)
+    nodes = launch_from_config(config)
     return nodes
 ```
 
@@ -356,7 +357,6 @@ async def start_tide_nodes():
 """
 Example sensor node that publishes simulated data.
 """
-import asyncio
 import time
 import random
 from datetime import datetime
@@ -385,7 +385,7 @@ class SensorNode(BaseNode):
         
         print(f"SensorNode started for robot {self.ROBOT_ID}")
     
-    async def step(self):
+    def step(self):
         """Publish simulated sensor data."""
         # Create simulated laser scan data
         num_points = 100
@@ -402,7 +402,7 @@ class SensorNode(BaseNode):
         )
         
         # Publish scan data
-        await self.put("lidar/scan", to_zenoh_value(scan))
+        self.put("lidar/scan", to_zenoh_value(scan))
         
         # Also publish a simple acceleration
         accel = Vector3(
@@ -411,7 +411,7 @@ class SensorNode(BaseNode):
             z=9.8 + random.uniform(-0.1, 0.1)
         )
         
-        await self.put("imu/accel", to_zenoh_value(accel))
+        self.put("imu/accel", to_zenoh_value(accel))
 ```
 
 2. Add the sensor node to your configuration:

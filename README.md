@@ -4,7 +4,7 @@ A lightweight, strongly-typed framework for robotics based on [Zenoh](https://ze
 
 ## Overview
 
-Tide wraps Zenoh's key/value-based pub-sub-query model in a set of strongly-typed "robot nodes," each running an asyncio task that talks over a shared Zenoh session. 
+Tide wraps Zenoh's key/value-based pub-sub-query model in a set of strongly-typed "robot nodes," each running in its own thread that talks over a shared Zenoh session.
 
 The framework enforces an opinionated namespacing pattern:
 
@@ -22,7 +22,7 @@ For example:
 - **Opinionated namespacing**: Clear, consistent naming pattern for all messages
 - **Zero-config networking**: Lean on Zenoh's peer discovery for automatic device connection
 - **Strongly-typed messages**: Uses Pydantic models for validation and serialization
-- **Pythonic + asyncio**: Single event loop per process keeps latency low
+- **Pythonic, thread-based architecture**: Each node runs in its own thread to keep latency low
 - **Callback-based**: Register callbacks for specific topics
 - **Command-line interface**: Easily create and manage Tide projects
 
@@ -124,32 +124,38 @@ class MyRobotNode(BaseNode):
         # Process command velocity message
         # ...
     
-    async def step(self):
+    def step(self):
         # Called at the node's update rate
         # Publish robot state
         pose = Pose2D(x=1.0, y=2.0, theta=0.5)
-        await self.put("state/pose2d", to_zenoh_value(pose))
+        self.put("state/pose2d", to_zenoh_value(pose))
 ```
 
 ### Launching Nodes
 
 ```python
-import asyncio
+import time
 from tide.core.utils import launch_from_config
 from tide.config import load_config
 
-async def main():
+def main():
     # Load configuration
     config = load_config('config.yaml')
-    
+
     # Launch nodes
-    nodes = await launch_from_config(config)
-    
-    # Run until interrupted
-    await asyncio.gather(*[n.tasks[0] for n in nodes])
+    nodes = launch_from_config(config)
+
+    try:
+        print(f"Started {len(nodes)} nodes. Press Ctrl+C to exit.")
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("Interrupted by user")
+        for node in nodes:
+            node.stop()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
 ```
 
 ### Configuration File
@@ -176,18 +182,18 @@ The generated project template includes a complete working example. Here's how t
 
 1. **TeleopNode** - Generates simple oscillating motion commands (simulating joystick)
    ```python
-   async def step(self):
+   def step(self):
        # Create sinusoidal motion pattern
        t = time.time()
        self.linear_vel = 0.5 * math.sin(0.2 * t)
        self.angular_vel = 0.2 * math.cos(0.1 * t)
-       
+
        # Create and publish the command
        cmd = Twist2D(
            linear=Vector2(x=self.linear_vel),
            angular=self.angular_vel
        )
-       await self.put("cmd/twist", to_zenoh_value(cmd))
+       self.put("cmd/twist", to_zenoh_value(cmd))
    ```
 
 2. **RobotNode** - Receives commands and simulates robot movement
@@ -197,16 +203,16 @@ The generated project template includes a complete working example. Here's how t
        self.linear_vel = cmd.linear.x
        self.angular_vel = cmd.angular
    
-   async def step(self):
+   def step(self):
        # Simple motion model - integrate velocity
        dt = time.time() - self.last_update
        self.theta += self.angular_vel * dt
        self.x += self.linear_vel * math.cos(self.theta) * dt
        self.y += self.linear_vel * math.sin(self.theta) * dt
-       
+
        # Publish the current pose
        pose = Pose2D(x=self.x, y=self.y, theta=self.theta)
-       await self.put("state/pose2d", to_zenoh_value(pose))
+       self.put("state/pose2d", to_zenoh_value(pose))
    ```
 
 3. **MonitorNode** - Displays the robot's state
