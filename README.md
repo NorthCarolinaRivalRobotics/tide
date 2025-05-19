@@ -16,6 +16,7 @@ For example:
 - `/frogbot/cmd/twist` - Command velocity for the "frogbot" robot
 - `/frogbot/state/pose2d` - 2D pose state for the robot
 - `/frogbot/sensor/lidar` - Lidar data from the robot
+See [docs/namespacing.md](docs/namespacing.md) for a full list of reserved namespaces.
 
 ## Features
 
