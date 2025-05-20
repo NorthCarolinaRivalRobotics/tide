@@ -2,8 +2,7 @@ name: Publish Python package
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [ main ]
 
 jobs:
   build-and-publish:
