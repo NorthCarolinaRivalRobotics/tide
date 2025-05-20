@@ -13,6 +13,7 @@ from datetime import datetime
 from tide.core.node import BaseNode
 from tide.models.common import LaserScan, Vector3
 from tide.models.serialization import to_zenoh_value, from_zenoh_value
+from tide import SensorTopic
 
 
 class SensorNode(BaseNode):
@@ -125,11 +126,11 @@ class SensorNode(BaseNode):
         scan = self.simulate_lidar(robot_x, robot_y, robot_theta)
         
         # Publish scan data
-        await self.put("lidar/scan", to_zenoh_value(scan))
+        await self.put(SensorTopic.LIDAR_SCAN.value, to_zenoh_value(scan))
         
         # Simulate and publish IMU data
         accel = self.simulate_imu()
-        await self.put("imu/accel", to_zenoh_value(accel))
+        await self.put(SensorTopic.IMU_ACCEL.value, to_zenoh_value(accel))
         
 
 class SensorProcessorNode(BaseNode):
@@ -149,8 +150,8 @@ class SensorProcessorNode(BaseNode):
         self.last_accel_time = None
         
         # Subscribe to sensor data
-        self.subscribe("sensor/lidar/scan", self._on_scan)
-        self.subscribe("sensor/imu/accel", self._on_accel)
+        self.subscribe(SensorTopic.LIDAR_SCAN.value, self._on_scan)
+        self.subscribe(SensorTopic.IMU_ACCEL.value, self._on_accel)
         
         print(f"SensorProcessorNode started for robot {self.ROBOT_ID}")
     

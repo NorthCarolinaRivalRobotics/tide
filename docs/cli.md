@@ -403,6 +403,7 @@ from datetime import datetime
 from tide.core.node import BaseNode
 from tide.models.common import LaserScan, Vector3
 from tide.models.serialization import to_zenoh_value
+from tide import SensorTopic
 
 class SensorNode(BaseNode):
     """
@@ -441,7 +442,7 @@ class SensorNode(BaseNode):
         )
         
         # Publish scan data
-        self.put("lidar/scan", to_zenoh_value(scan))
+        self.put(SensorTopic.LIDAR_SCAN.value, to_zenoh_value(scan))
         
         # Also publish a simple acceleration
         accel = Vector3(
@@ -450,7 +451,7 @@ class SensorNode(BaseNode):
             z=9.8 + random.uniform(-0.1, 0.1)
         )
         
-        self.put("imu/accel", to_zenoh_value(accel))
+        self.put(SensorTopic.IMU_ACCEL.value, to_zenoh_value(accel))
 ```
 
 2. Add the sensor node to your configuration:

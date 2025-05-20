@@ -11,6 +11,7 @@ from datetime import datetime
 from tide.core.node import BaseNode
 from tide.models.common import Twist2D, Vector2
 from tide.models.serialization import to_zenoh_value
+from tide import CmdTopic
 
 
 class TeleopNode(BaseNode):
@@ -52,5 +53,5 @@ class TeleopNode(BaseNode):
             angular=self.angular_vel
         )
         
-        await self.put("cmd/twist", to_zenoh_value(cmd))
+        await self.put(CmdTopic.TWIST.value, to_zenoh_value(cmd))
         print(f"Sent command: linear={{self.linear_vel:.2f}}, angular={{self.angular_vel:.2f}}") 

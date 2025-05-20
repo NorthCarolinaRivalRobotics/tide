@@ -10,6 +10,7 @@ from datetime import datetime
 from tide.core.node import BaseNode
 from tide.models.common import Pose2D
 from tide.models.serialization import from_zenoh_value
+from tide import StateTopic
 
 
 class MonitorNode(BaseNode):
@@ -27,7 +28,7 @@ class MonitorNode(BaseNode):
         self.last_pose_time = None
         
         # Subscribe to robot state
-        self.subscribe("state/pose2d", self._on_pose)
+        self.subscribe(StateTopic.POSE2D.value, self._on_pose)
         
         print(f"MonitorNode started for robot {{self.ROBOT_ID}}")
     
