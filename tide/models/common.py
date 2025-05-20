@@ -14,11 +14,7 @@ class TideMessage(BaseModel):
     """Base class for all messages in the tide framework."""
     timestamp: datetime = Field(default_factory=datetime.now)
     
-    model_config = ConfigDict(
-        json_encoders={
-            datetime: lambda dt: dt.isoformat()
-        }
-    )
+    model_config = ConfigDict()
 
 
 class Vector2(BaseModel):
@@ -47,11 +43,7 @@ class Header(BaseModel):
     frame_id: str = ""
     stamp: datetime = Field(default_factory=datetime.now)
     
-    model_config = ConfigDict(
-        json_encoders={
-            datetime: lambda dt: dt.isoformat()
-        }
-    )
+    model_config = ConfigDict()
 
 
 class Twist2D(TideMessage):
