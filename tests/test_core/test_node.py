@@ -119,8 +119,7 @@ class TestBaseNode:
         # At this point, our BaseNode's _latest_values should have the Zenoh sample
         # Test take which consumes the value
         taken_value = node.take("test_topic")
-        assert taken_value is not None
-        assert hasattr(taken_value, 'payload')
+        assert taken_value == test_value
         
         # Take again should now be None
         empty_value = node.take("test_topic")
