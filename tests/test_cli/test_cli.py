@@ -87,3 +87,31 @@ def test_cmd_up(monkeypatch, tmp_path):
     with pytest.raises(SystemExit):
         cmd_up(args, run_duration=0.1)
     dummy_node.stop.assert_called()
+
+
+def test_discover_nodes_parses_keys(monkeypatch):
+    class FakeKeyExpr:
+        def __init__(self, key):
+            self._key = key
+        def to_string(self):
+            return self._key
+    class FakeReply:
+        def __init__(self, key):
+            self.ok = SimpleNamespace(key_expr=FakeKeyExpr(key))
+    class FakeSession:
+        def get(self, expr):
+            return [FakeReply('robotA/ping/ping')]
+        def close(self):
+            pass
+
+    monkeypatch.setattr('tide.cli.utils.zenoh.open', lambda cfg=None: FakeSession())
+
+    from importlib import reload
+    import tide.cli.utils as utils
+    reload(utils)
+
+    nodes = utils.discover_nodes(timeout=0.1)
+    assert len(nodes) == 1
+    assert nodes[0]['robot_id'] == 'robotA'
+    assert nodes[0]['group'] == 'ping'
+    assert nodes[0]['topic'] == 'ping'

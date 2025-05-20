@@ -108,7 +108,9 @@ def discover_nodes(timeout: float = 2.0) -> List[Dict[str, Any]]:
         # Query for anything matching the robot_id/group/topic pattern
         # This allows discovery of nodes even if they don't publish to the
         # reserved "state" group.
-        replies = z.get("*/*/*")
+        # Query with wildcard allowing any number of topic segments
+        # This supports topics like "robot/group/sub/topic"
+        replies = z.get("*/*/**")
         
         while time.time() - start_time < timeout:
             # Process any new replies
@@ -116,9 +118,10 @@ def discover_nodes(timeout: float = 2.0) -> List[Dict[str, Any]]:
                 if hasattr(reply, 'ok'):
                     key_parts = reply.ok.key_expr.to_string().split('/')
                     if len(key_parts) >= 3:
-                        robot_id = key_parts[1]
-                        group = key_parts[2]
-                        topic = '/'.join(key_parts[3:])
+                        # key_parts contains [robot_id, group, ...]
+                        robot_id = key_parts[0]
+                        group = key_parts[1]
+                        topic = '/'.join(key_parts[2:])
                         
                         # Add to discovered nodes if not already present
                         node_entry = {
