@@ -148,18 +148,15 @@ class SE2:
         theta = self.rotation.theta
         v = self.translation
         if abs(theta) < 1e-6:
-            return np.array([v[0], v[1], 0.0])
-        V_inv = (
-            theta
-            / (2 * (1 - np.cos(theta)))
-            * np.array(
+            rho = v
+        else:
+            V = np.array(
                 [
-                    [np.sin(theta), 1 - np.cos(theta)],
-                    [-(1 - np.cos(theta)), np.sin(theta)],
+                    [np.sin(theta) / theta, -(1 - np.cos(theta)) / theta],
+                    [(1 - np.cos(theta)) / theta, np.sin(theta) / theta],
                 ]
             )
-        )
-        rho = V_inv @ v
+            rho = np.linalg.inv(V) @ v
         return np.array([rho[0], rho[1], theta])
 
     def as_matrix(self) -> 'np.ndarray':
@@ -200,8 +197,8 @@ class SE3:
             K = _skew(k)
             V = (
                 np.eye(3)
-                + (1 - np.cos(theta)) / theta * K
-                + (theta - np.sin(theta)) / theta * (K @ K)
+                + (1 - np.cos(theta)) / (theta ** 2) * K
+                + (theta - np.sin(theta)) / (theta ** 3) * (K @ K)
             )
         t = V @ rho
         return cls(R, t)
@@ -215,12 +212,12 @@ class SE3:
         else:
             k = phi / theta
             K = _skew(k)
-            A = 1 - 0.5 * theta * np.tan(0.5 * theta)
-            V_inv = (
+            V = (
                 np.eye(3)
-                - 0.5 * K
-                + A * (K @ K)
+                + (1 - np.cos(theta)) / (theta ** 2) * K
+                + (theta - np.sin(theta)) / (theta ** 3) * (K @ K)
             )
+            V_inv = np.linalg.inv(V)
         rho = V_inv @ self.translation
         return np.concatenate([rho, phi])
 
