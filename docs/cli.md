@@ -23,13 +23,13 @@ The Tide CLI provides a set of commands to help you create, run, and manage Tide
 Install Tide using pip:
 
 ```bash
-pip install tide
+pip install tide-sdk
 ```
 
 Or with uv (recommended):
 
 ```bash
-uv add tide
+uv add tide-sdk
 ```
 
 ## Commands
@@ -356,7 +356,7 @@ If you have an existing Python project and want to add Tide functionality:
 1. Install Tide:
 
 ```bash
-uv add tide
+uv add tide-sdk
 ```
 
 2. Create a default configuration file:

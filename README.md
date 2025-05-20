@@ -30,13 +30,13 @@ See [docs/namespacing.md](docs/namespacing.md) for a full list of reserved names
 ## Installation
 
 ```bash
-pip install tide
+pip install tide-sdk
 ```
 
 Or with uv (recommended):
 
 ```bash
-uv add tide
+uv add tide-sdk
 ```
 
 ## Command-Line Interface

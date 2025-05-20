@@ -2,7 +2,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="tide",
+    name="tide-sdk",
     version="0.1.0",
     description="A Zenoh-based robotics framework with opinionated namespacing",
     long_description=open("README.md").read(),
