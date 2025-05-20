@@ -57,6 +57,19 @@ def test_cmd_init_config(tmp_path):
     assert cfg.exists()
 
 
+def test_cmd_init_config_with_nodes(tmp_path):
+    cfg_dir = tmp_path / "config"
+    cfg_dir.mkdir()
+    cfg = cfg_dir / "config.yaml"
+    args = argparse.Namespace(output=str(cfg), robot_id='r1', force=False, include_node=True)
+    result = cmd_init_config(args)
+    assert result == 0
+    assert cfg.exists()
+    # nodes should be created alongside the config parent directory
+    assert (tmp_path / 'ping_node.py').exists()
+    assert (tmp_path / 'pong_node.py').exists()
+
+
 def test_cmd_init_creates_project(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     args = argparse.Namespace(project_name='proj', robot_id='r1', force=False)
