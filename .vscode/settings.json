@@ -1,0 +1,12 @@
+{
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": [
+    "tests",
+    "--cov",
+    "--cov-report=xml",
+    "--cov-branch"
+  ],
+  "coverage-gutters.coverageFileNames": ["coverage.xml"],
+  "coverage-gutters.showGutterCoverage": true,
+  "coverage-gutters.showLineCoverage": false
+}

@@ -1,0 +1,4 @@
+# file: /Users/bencaunt/Documents/tide/tide/core/geometry/__init__.py
+# hypothesis_version: 6.131.15
+
+[-1.0, 0.0, 1e-10, 0.5, 1.0, 2.0, 'Quaternion', 'SE2', 'SE3', 'SO2', 'SO3', 'np.ndarray']
