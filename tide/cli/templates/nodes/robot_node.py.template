@@ -11,6 +11,7 @@ from datetime import datetime
 from tide.core.node import BaseNode
 from tide.models.common import Twist2D, Pose2D
 from tide.models.serialization import to_zenoh_value, from_zenoh_value
+from tide import CmdTopic, StateTopic
 
 
 class RobotNode(BaseNode):
@@ -34,7 +35,7 @@ class RobotNode(BaseNode):
         self.last_update = time.time()
         
         # Subscribe to command velocity
-        self.subscribe("cmd/twist", self._on_cmd_vel)
+        self.subscribe(CmdTopic.TWIST.value, self._on_cmd_vel)
         
         print(f"RobotNode started for robot {{self.ROBOT_ID}}")
     
@@ -66,4 +67,4 @@ class RobotNode(BaseNode):
         
         # Publish the current pose
         pose = Pose2D(x=self.x, y=self.y, theta=self.theta)
-        await self.put("state/pose2d", to_zenoh_value(pose)) 
+        await self.put(StateTopic.POSE2D.value, to_zenoh_value(pose))

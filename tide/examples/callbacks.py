@@ -16,6 +16,7 @@ from datetime import datetime
 
 from tide.core.node import BaseNode
 from tide.models import Twist2D, Pose2D, to_zenoh_value, from_zenoh_value
+from tide import CmdTopic, StateTopic
 
 
 class CallbackRobotNode(BaseNode):
@@ -43,10 +44,10 @@ class CallbackRobotNode(BaseNode):
         self.last_update = time.time()
         
         # Use register_callback to set up message handlers
-        self.register_callback("cmd/twist", self._on_cmd_vel)
-        
+        self.register_callback(CmdTopic.TWIST.value, self._on_cmd_vel)
+
         # You can register multiple callbacks for the same topic
-        self.register_callback("cmd/twist", self._log_cmd_vel)
+        self.register_callback(CmdTopic.TWIST.value, self._log_cmd_vel)
         
         print(f"CallbackRobotNode started for robot {self.ROBOT_ID}")
     
@@ -110,7 +111,7 @@ class CallbackRobotNode(BaseNode):
         )
         
         # Publish pose
-        await self.put("state/pose2d", to_zenoh_value(pose))
+        await self.put(StateTopic.POSE2D.value, to_zenoh_value(pose))
 
 
 class CommandPublisherNode(BaseNode):
@@ -154,7 +155,7 @@ class CommandPublisherNode(BaseNode):
         )
         
         # Send command directly to the target robot
-        key = f"/{self.target_robot}/cmd/twist"
+        key = f"/{self.target_robot}/{CmdTopic.TWIST.value}"
         await self.z.put(key, to_zenoh_value(cmd_vel))
         
         # Print current command
@@ -177,7 +178,7 @@ class StateMonitorNode(BaseNode):
         self.target_robot = config.get("target_robot", "frogbot") if config else "frogbot"
         
         # Subscribe to robot's pose using register_callback
-        key = f"/{self.target_robot}/state/pose2d"
+        key = f"/{self.target_robot}/{StateTopic.POSE2D.value}"
         self.register_callback(key, self._on_pose_update)
         
         self.last_pose = None

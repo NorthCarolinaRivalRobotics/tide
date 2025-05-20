@@ -18,6 +18,7 @@ from datetime import datetime
 from tide.core.node import BaseNode
 from tide.models.common import Twist2D, Pose2D
 from tide.models.serialization import to_zenoh_value, from_zenoh_value
+from tide import CmdTopic, StateTopic
 
 
 class SimpleRobotNode(BaseNode):
@@ -46,9 +47,8 @@ class SimpleRobotNode(BaseNode):
         
         self.last_update = time.time()
         
-        # Subscribe to command velocity
-        # Using the cmd/twist namespace
-        self.subscribe("cmd/twist", self._on_cmd_vel)
+        # Subscribe to command velocity using reserved topic
+        self.subscribe(CmdTopic.TWIST.value, self._on_cmd_vel)
         
         print(f"SimpleRobotNode started for robot {self.ROBOT_ID}")
     
@@ -98,17 +98,16 @@ class SimpleRobotNode(BaseNode):
         # Update position
         self._update_pose(dt)
         
-        # Create and publish pose message
-        # Using the state/pose2d namespace
+        # Create and publish pose message using reserved topic
         pose = Pose2D(
             x=self.x,
             y=self.y,
             theta=self.theta,
             timestamp=datetime.now()
         )
-        
+
         # Publish pose
-        self.put("state/pose2d", to_zenoh_value(pose))
+        self.put(StateTopic.POSE2D.value, to_zenoh_value(pose))
 
 
 class TeleopNode(BaseNode):
@@ -165,7 +164,7 @@ class TeleopNode(BaseNode):
         
         # Send command to the robot
         # We bypass the group here to put directly to the robot's command topic
-        key = f"/{self.ROBOT_ID}/cmd/twist"
+        key = f"/{self.ROBOT_ID}/{CmdTopic.TWIST.value}"
         self.put(key, to_zenoh_value(cmd_vel))
         
         # Print current command
@@ -189,7 +188,7 @@ class MonitorNode(BaseNode):
             self.ROBOT_ID = config["robot_id"]
             
         # Subscribe to robot's pose
-        key = f"/{self.ROBOT_ID}/state/pose2d"
+        key = f"/{self.ROBOT_ID}/{StateTopic.POSE2D.value}"
         self.subscribe(key, self._on_pose)
         
         self.last_pose = None
