@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Type
 
 try:
     from pydantic import BaseModel, Field, ConfigDict
@@ -13,8 +13,25 @@ except ImportError:
 class TideMessage(BaseModel):
     """Base class for all messages in the tide framework."""
     timestamp: datetime = Field(default_factory=datetime.now)
-    
+
     model_config = ConfigDict()
+
+    def to_bytes(self) -> bytes:
+        """Serialize this message to CBOR bytes."""
+        from .serialization import to_cbor
+
+        return to_cbor(self)
+
+    def __bytes__(self) -> bytes:  # type: ignore[override]
+        """bytes(obj) returns the CBOR representation."""
+        return self.to_bytes()
+
+    @classmethod
+    def from_bytes(cls: Type['TideMessage'], data: Union[bytes, str]) -> 'TideMessage':
+        """Deserialize bytes into a message instance."""
+        from .serialization import from_cbor
+
+        return from_cbor(data, cls)
 
 
 class Vector2(BaseModel):

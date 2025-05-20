@@ -19,6 +19,10 @@ from tide.models.serialization import (
     to_dict,
     to_zenoh_value,
     from_zenoh_value,
+    to_cbor,
+    from_cbor,
+    encode_message,
+    decode_message,
 )
 
 from tide.models.robot import (
@@ -51,6 +55,10 @@ __all__ = [
     'to_dict',
     'to_zenoh_value',
     'from_zenoh_value',
+    'to_cbor',
+    'from_cbor',
+    'encode_message',
+    'decode_message',
     
     # Robot configuration
     'RobotType',
