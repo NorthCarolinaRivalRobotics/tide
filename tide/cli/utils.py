@@ -97,16 +97,18 @@ def discover_nodes(timeout: float = 2.0) -> List[Dict[str, Any]]:
     """
     # Create a zenoh session for discovery
     z = zenoh.open(zenoh.Config())
-    
-    # Query for nodes
+
+    # Query for nodes across all groups
     discovered_nodes = []
     
     # Wait for responses
     start_time = time.time()
     
     try:
-        # Query for anything in the */state/* namespace
-        replies = z.get("*/state/*")
+        # Query for anything matching the robot_id/group/topic pattern
+        # This allows discovery of nodes even if they don't publish to the
+        # reserved "state" group.
+        replies = z.get("*/*/*")
         
         while time.time() - start_time < timeout:
             # Process any new replies
