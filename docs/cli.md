@@ -167,7 +167,9 @@ tide up --config custom_config.yaml
 
 ### `status` Command
 
-The `status` command discovers and displays information about running Tide nodes on the network.
+The `status` command discovers and displays information about running Tide nodes
+on the network. Discovery now queries all groups (`*/*/*`), so even nodes that
+only publish custom topics like the ping-pong example will be listed.
 
 ```bash
 tide status [options]

@@ -92,7 +92,9 @@ To discover running Tide nodes on the network:
 tide status
 ```
 
-This shows a list of all discovered Tide nodes, including:
+This shows a list of all discovered Tide nodes. The discovery uses the
+`*/*/*` wildcard so custom groups like the ping-pong example are also found.
+The output includes:
 - Robot ID
 - Group
 - Topic
