@@ -1,5 +1,5 @@
 [project]
-name = "tide"
+name = "tide-sdk"
 version = "0.1.0"
 description = "A Zenoh-based robotics framework with opinionated namespacing"
 readme = "README.md"
