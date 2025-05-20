@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Union, Callable
 
 import zenoh
+from tide.models.serialization import encode_message, decode_message
 
 class BaseNode(ABC):
     """
@@ -112,9 +113,14 @@ class BaseNode(ABC):
             print(f"Warning: Publisher for {full_key} is None")
             return
             
-        # Simple non-async put as in the working examples
+        # Encode value if needed
         try:
-            publisher.put(value)
+            payload = encode_message(value)
+        except Exception:
+            payload = value
+
+        try:
+            publisher.put(payload)
         except Exception as e:
             print(f"Error publishing to {full_key}: {e}")
 
@@ -139,7 +145,10 @@ class BaseNode(ABC):
             
             for reply in replies:
                 if hasattr(reply, 'ok'):
-                    return reply.ok.payload
+                    try:
+                        return decode_message(reply.ok.payload, dict)
+                    except Exception:
+                        return reply.ok.payload
         except Exception as e:
             print(f"Error getting value for {full_key}: {e}")
             
@@ -159,7 +168,10 @@ class BaseNode(ABC):
         if full_key in self._latest_values:
             value = self._latest_values[full_key]
             self._latest_values[full_key] = None  # Consume the value
-            return value
+            try:
+                return decode_message(value, dict)
+            except Exception:
+                return value
         return None
 
     def subscribe(self, key: str, callback: Optional[Callable[[Any], None]] = None) -> None:
@@ -178,13 +190,18 @@ class BaseNode(ABC):
         full_key = self._make_key(key)
         
         def _on_sample(sample):
+            try:
+                value = decode_message(sample.payload, dict)
+            except Exception:
+                value = sample
+
             # Store the latest value
-            self._latest_values[full_key] = sample
+            self._latest_values[full_key] = value
             
             # Call the direct callback if provided
             if callback:
                 try:
-                    callback(sample)
+                    callback(value)
                 except Exception as e:
                     print(f"Error in callback for {full_key}: {e}")
                 
@@ -192,7 +209,7 @@ class BaseNode(ABC):
             if full_key in self._callbacks:
                 for cb in self._callbacks[full_key]:
                     try:
-                        cb(sample)
+                        cb(value)
                     except Exception as e:
                         print(f"Error in registered callback for {full_key}: {e}")
         
