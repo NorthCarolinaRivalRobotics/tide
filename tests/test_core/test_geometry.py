@@ -1,8 +1,7 @@
 import pytest
 from hypothesis import given, strategies as st
 
-np = pytest.importorskip("numpy")
-
+import numpy as np 
 from tide.core.geometry import Quaternion, SO2, SO3, SE2, SE3
 
 

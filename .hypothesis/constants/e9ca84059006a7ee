@@ -1,0 +1,4 @@
+# file: /Users/bencaunt/Documents/tide/tide/cli/main.py
+# hypothesis_version: 6.131.15
+
+[2.0, '--config', '--create-config', '--force', '--include-node', '--output', '--output-dir', '--robot-id', '--timeout', '--version', '.', 'Command to run', 'Run a Tide project', '__main__', 'command', 'config/config.yaml', 'init', 'init-config', 'init-pingpong', 'myrobot', 'project_name', 'status', 'store_true', 'up', 'version']

@@ -1,0 +1,4 @@
+# file: /Users/bencaunt/Documents/tide/tide/cli/utils.py
+# hypothesis_version: 6.131.15
+
+[0.1, 2.0, '%(message)s', '*/*/**', '/', '[%X]', 'group', 'ok', 'r', 'robot_id', 'templates', 'tide.cli', 'timestamp', 'topic', '{', '}']

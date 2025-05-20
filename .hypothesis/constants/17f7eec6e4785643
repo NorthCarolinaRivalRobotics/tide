@@ -1,0 +1,4 @@
+# file: /Users/bencaunt/Documents/tide/tide/cli/commands/status.py
+# hypothesis_version: 6.131.15
+
+['Group', 'Robot ID', 'Topic', 'bold cyan', 'group', 'robot_id', 'topic']

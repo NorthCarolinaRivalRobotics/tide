@@ -71,17 +71,11 @@ Tests are written using `pytest`. To execute the test suite:
 uv run pytest
 ```
 
-## Package Management with `uv`
+## Run with Coverage 
 
--   To add a new package:
-    ```bash
-    uv add package-name
-    ```
--   To sync dependencies from `pyproject.toml` (and update `uv.lock`):
-    ```bash
-    uv sync
-    ```
-    (This is also handled by `install-deps.bash`)
+```bash
+uv run pytest --cov --cov-report=xml --cov-report=term-missing
+```
 
 ## Key Files and Directories
 
@@ -95,3 +89,8 @@ uv run pytest
 -   `tests/`: Contains project tests.
 -   `config/` (in generated projects): Typically contains node configurations (e.g., `config.yaml`).
 -   `nodes/` (in generated projects): Typically contains custom robot node implementations. 
+
+
+## Project Standards 
+- When making breaking changes you must also update documentation (doc strings or .md files in /docs).
+- If you make public facing api changes then you should also make sure the examples are properly up to date. 
