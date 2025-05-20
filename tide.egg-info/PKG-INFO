@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: tide
-Version: 0.1.0
+Version: 0.1.1
 Summary: A Zenoh-based robotics framework with opinionated namespacing
 Author: Tide Team
 Requires-Python: >=3.12

@@ -28,4 +28,4 @@ jobs:
       - name: Run tests
         env:
           PYTHONPATH: .
-        run: uv run pytest -q
+        run: uv run pytest -q --cov=tide
