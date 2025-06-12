@@ -240,6 +240,12 @@ This demonstrates:
 - **Acceleration3D**: 3D acceleration (linear and angular)
 - **LaserScan**: 2D laser scan data
 
+## Built-in Nodes
+
+Tide ships with a small library of reusable nodes.  `PIDNode` implements a
+basic PID controller that reads a state and reference value and publishes a
+command.  See [docs/pid_node.md](docs/pid_node.md) for configuration details.
+
 ## License
 
 MIT

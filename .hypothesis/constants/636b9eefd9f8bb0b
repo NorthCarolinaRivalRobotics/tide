@@ -1,4 +1,0 @@
-# file: /Users/bencaunt/Documents/tide/tide/namespaces.py
-# hypothesis_version: 6.131.15
-
-['CMD_TYPES', 'CmdTopic', 'Group', 'SENSOR_TYPES', 'STATE_TYPES', 'SensorTopic', 'StateTopic', 'cmd', 'cmd/pose2d', 'cmd/pose3d', 'cmd/twist', 'manipulator', 'sensor', 'sensor/imu/accel', 'sensor/lidar/scan', 'sensor_camera_depth', 'sensor_camera_rgb', 'state', 'state/pose2d', 'state/pose3d', 'state/twist']
