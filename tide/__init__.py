@@ -9,6 +9,7 @@ __version__ = "0.1.5"
 
 # Import core components
 from tide.core.node import BaseNode
+from tide.components import PIDNode
 
 # Reserved namespace enums and helpers
 from tide.namespaces import (
@@ -28,4 +29,5 @@ __all__ = [
     "SensorTopic",
     "sensor_camera_rgb",
     "sensor_camera_depth",
+    "PIDNode",
 ]

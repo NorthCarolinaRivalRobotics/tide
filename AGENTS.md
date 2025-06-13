@@ -91,6 +91,13 @@ uv run pytest --cov --cov-report=xml --cov-report=term-missing
 -   `nodes/` (in generated projects): Typically contains custom robot node implementations. 
 
 
-## Project Standards 
+## Project Standards
 - When making breaking changes you must also update documentation (doc strings or .md files in /docs).
-- If you make public facing api changes then you should also make sure the examples are properly up to date. 
+- If you make public facing api changes then you should also make sure the examples are properly up to date.
+
+### Integration Testing Guidelines
+
+Integration tests should exercise real Zenoh communication. Avoid standalone
+"dummy" publishers in unit tests. Instead, launch nodes through a configuration
+using `launch_from_config()` (or the `tide up` CLI) so the entire Tide process
+is involved in the test.

@@ -1,4 +1,0 @@
-# file: /Users/bencaunt/Documents/tide/tide/cli/commands/init_pingpong.py
-# hypothesis_version: 6.131.15
-
-[493, '.', 'config', 'create_config', 'output_dir', 'ping_node.py', 'pingpong_config.yaml', 'pong_node.py', 'project_name', 'robot_id', 'w']
