@@ -1,0 +1,4 @@
+# file: /workspace/tide/tide/cli/commands/__init__.py
+# hypothesis_version: 6.131.15
+
+['cmd_init', 'cmd_init_config', 'cmd_init_pingpong', 'cmd_status', 'cmd_up']

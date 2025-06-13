@@ -101,3 +101,9 @@ Integration tests should exercise real Zenoh communication. Avoid standalone
 "dummy" publishers in unit tests. Instead, launch nodes through a configuration
 using `launch_from_config()` (or the `tide up` CLI) so the entire Tide process
 is involved in the test.
+
+### Testing Consistency
+
+Hypothesis-based tests may generate example databases in `.hypothesis/`
+directories. Do **not** add these directories to `.gitignore`; keeping them
+ensures repeatable test runs across environments.
