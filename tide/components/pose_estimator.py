@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+import logging
 from typing import Optional
 
 import numpy as np
@@ -21,54 +22,45 @@ from tide.models import Twist2D, Twist3D, Pose2D, Pose3D
 from tide.models.serialization import to_zenoh_value
 
 
-class SE2Estimator:
+class _EKFBase:
+    """Shared EKF logic for Lie groups."""
+
+    def __init__(self, dim: int, group_cls, adj_fn) -> None:
+        self._group_cls = group_cls
+        self._adj_fn = adj_fn
+        self.pose = group_cls.identity()
+        self.P = np.eye(dim) * 1e-3
+        self.Q = np.eye(dim) * 1e-4
+        self.R = np.eye(dim) * 1e-2
+
+    def propagate(self, twist: np.ndarray, dt: float) -> None:
+        delta = twist * dt
+        inc = self._group_cls.exp(delta)
+        self.pose = self.pose * inc
+        Ad = self._adj_fn(inc)
+        self.P = Ad @ self.P @ Ad.T + self.Q * dt * dt
+
+    def update(self, measurement) -> None:
+        err = (self.pose.inverse() * measurement).log()
+        S = self.P + self.R
+        K = np.linalg.solve(S.T, self.P.T).T
+        delta = K @ err
+        self.pose = self.pose * self._group_cls.exp(delta)
+        self.P = (np.eye(self.P.shape[0]) - K) @ self.P
+
+
+class SE2Estimator(_EKFBase):
     """Extended Kalman Filter on SE(2)."""
 
     def __init__(self) -> None:
-        self.pose = SE2.identity()
-        self.P = np.eye(3) * 1e-3
-        self.Q = np.eye(3) * 1e-4
-        self.R = np.eye(3) * 1e-2
-
-    def propagate(self, twist: np.ndarray, dt: float) -> None:
-        delta = twist * dt
-        inc = SE2.exp(delta)
-        self.pose = self.pose * inc
-        Ad = adjoint_se2(inc)
-        self.P = Ad @ self.P @ Ad.T + self.Q * dt * dt
-
-    def update(self, measurement: SE2) -> None:
-        err = (self.pose.inverse() * measurement).log()
-        S = self.P + self.R
-        K = self.P @ np.linalg.inv(S)
-        delta = K @ err
-        self.pose = self.pose * SE2.exp(delta)
-        self.P = (np.eye(3) - K) @ self.P
+        super().__init__(3, SE2, adjoint_se2)
 
 
-class SE3Estimator:
+class SE3Estimator(_EKFBase):
     """Extended Kalman Filter on SE(3)."""
 
     def __init__(self) -> None:
-        self.pose = SE3.identity()
-        self.P = np.eye(6) * 1e-3
-        self.Q = np.eye(6) * 1e-4
-        self.R = np.eye(6) * 1e-2
-
-    def propagate(self, twist: np.ndarray, dt: float) -> None:
-        delta = twist * dt
-        inc = SE3.exp(delta)
-        self.pose = self.pose * inc
-        Ad = adjoint_se3(inc)
-        self.P = Ad @ self.P @ Ad.T + self.Q * dt * dt
-
-    def update(self, measurement: SE3) -> None:
-        err = (self.pose.inverse() * measurement).log()
-        S = self.P + self.R
-        K = self.P @ np.linalg.inv(S)
-        delta = K @ err
-        self.pose = self.pose * SE3.exp(delta)
-        self.P = (np.eye(6) - K) @ self.P
+        super().__init__(6, SE3, adjoint_se3)
 
 
 class PoseEstimatorNode(BaseNode):
@@ -91,11 +83,24 @@ class PoseEstimatorNode(BaseNode):
             self._twist_cls = Twist3D
             self._pose_cls = Pose3D
             self._to_group = self._pose3d_to_se3
+            self._twist_to_vec = lambda t: np.array([
+                t.linear.x,
+                t.linear.y,
+                t.linear.z,
+                t.angular.x,
+                t.angular.y,
+                t.angular.z,
+            ])
         else:
             self.estimator = SE2Estimator()
             self._twist_cls = Twist2D
             self._pose_cls = Pose2D
             self._to_group = self._pose2d_to_se2
+            self._twist_to_vec = lambda t: np.array([
+                t.linear.x,
+                t.linear.y,
+                t.angular,
+            ])
 
         self.subscribe(self.twist_topic)
         self.subscribe(self.measure_topic)
@@ -125,34 +130,19 @@ class PoseEstimatorNode(BaseNode):
         if twist_dict is not None:
             try:
                 self._last_twist = self._twist_cls.model_validate(twist_dict)
-            except Exception:
-                pass
+            except Exception as e:
+                logging.debug("Failed to validate twist_dict: %s", e, exc_info=True)
 
         if self._last_twist is not None:
-            if isinstance(self._last_twist, Twist2D):
-                tw = np.array([
-                    self._last_twist.linear.x,
-                    self._last_twist.linear.y,
-                    self._last_twist.angular,
-                ])
-            else:
-                tw = np.array([
-                    self._last_twist.linear.x,
-                    self._last_twist.linear.y,
-                    self._last_twist.linear.z,
-                    self._last_twist.angular.x,
-                    self._last_twist.angular.y,
-                    self._last_twist.angular.z,
-                ])
-            self.estimator.propagate(tw, dt)
+            self.estimator.propagate(self._twist_to_vec(self._last_twist), dt)
 
         meas_dict = self.take(self.measure_topic)
         if meas_dict is not None:
             try:
                 m = self._pose_cls.model_validate(meas_dict)
                 self.estimator.update(self._to_group(m))
-            except Exception:
-                pass
+            except Exception as e:
+                logging.debug("Failed to validate measurement: %s", e, exc_info=True)
 
         g = self.estimator.pose
         if isinstance(g, SE2):

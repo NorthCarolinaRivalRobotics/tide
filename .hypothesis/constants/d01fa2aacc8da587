@@ -1,0 +1,4 @@
+# file: /workspace/tide/tide/models/robot.py
+# hypothesis_version: 6.131.15
+
+['ackermann', 'camera', 'differential', 'encoder', 'gps', 'imu', 'lidar', 'manipulator', 'omnidirectional']

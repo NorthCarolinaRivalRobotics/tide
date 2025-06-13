@@ -1,4 +1,5 @@
 import pytest
+import math
 
 np = pytest.importorskip("numpy")
 
@@ -63,3 +64,14 @@ def test_quaternion_identity():
     assert q == Quaternion(0.0, 0.0, 0.0, 1.0)
     r, p, y = q.to_euler()
     assert r == p == y == 0.0
+
+
+def test_quaternion_normalization():
+    g = SO3.exp(np.array([0.1, -0.2, 0.3]))
+    q = g.to_quaternion()
+    norm = math.sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w)
+    assert abs(norm - 1.0) < 1e-6
+    R = q.as_matrix()
+    np.testing.assert_allclose(R @ R.T, np.eye(3), atol=1e-6)
+    g2 = SO3.from_quaternion(q)
+    np.testing.assert_allclose(g2.matrix, g.matrix)
