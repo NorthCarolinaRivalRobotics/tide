@@ -51,6 +51,17 @@ class Quaternion:
         yaw = math.atan2(siny_cosp, cosy_cosp)
         return roll, pitch, yaw
 
+    def as_matrix(self) -> 'np.ndarray':
+        """Convert quaternion to rotation matrix."""
+        x, y, z, w = self.x, self.y, self.z, self.w
+        return np.array(
+            [
+                [1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+                [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
+                [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)],
+            ]
+        )
+
 
 
 class SO2:
@@ -111,12 +122,48 @@ class SO3:
         return vec
 
     def as_matrix(self) -> 'np.ndarray':
-        
+
         return self.matrix
+
+    def to_quaternion(self) -> 'Quaternion':
+        """Convert this rotation to a quaternion."""
+        m = self.matrix
+        tr = m[0, 0] + m[1, 1] + m[2, 2]
+        if tr > 0:
+            s = 0.5 / np.sqrt(tr + 1.0)
+            w = 0.25 / s
+            x = (m[2, 1] - m[1, 2]) * s
+            y = (m[0, 2] - m[2, 0]) * s
+            z = (m[1, 0] - m[0, 1]) * s
+        else:
+            if m[0, 0] > m[1, 1] and m[0, 0] > m[2, 2]:
+                s = 2.0 * np.sqrt(1.0 + m[0, 0] - m[1, 1] - m[2, 2])
+                w = (m[2, 1] - m[1, 2]) / s
+                x = 0.25 * s
+                y = (m[0, 1] + m[1, 0]) / s
+                z = (m[0, 2] + m[2, 0]) / s
+            elif m[1, 1] > m[2, 2]:
+                s = 2.0 * np.sqrt(1.0 + m[1, 1] - m[0, 0] - m[2, 2])
+                w = (m[0, 2] - m[2, 0]) / s
+                x = (m[0, 1] + m[1, 0]) / s
+                y = 0.25 * s
+                z = (m[1, 2] + m[2, 1]) / s
+            else:
+                s = 2.0 * np.sqrt(1.0 + m[2, 2] - m[0, 0] - m[1, 1])
+                w = (m[1, 0] - m[0, 1]) / s
+                x = (m[0, 2] + m[2, 0]) / s
+                y = (m[1, 2] + m[2, 1]) / s
+                z = 0.25 * s
+        return Quaternion(x=x, y=y, z=z, w=w)
 
     @classmethod
     def from_matrix(cls, m: 'np.ndarray') -> 'SO3':
         return cls(m)
+
+    @classmethod
+    def from_quaternion(cls, q: 'Quaternion') -> 'SO3':
+        """Create an SO3 from a quaternion."""
+        return cls(q.as_matrix())
 
 
 class SE2:
@@ -143,6 +190,11 @@ class SE2:
             )
             t = V @ v
         return cls(R, t)
+
+    @staticmethod
+    def identity() -> 'SE2':
+        """Return the identity transformation."""
+        return SE2(SO2.exp(0.0), np.zeros(2))
 
     def log(self) -> 'np.ndarray':
         theta = self.rotation.theta
@@ -175,6 +227,21 @@ class SE2:
         t = m[:2, 2]
         return cls(R, t)
 
+    def __mul__(self, other: 'SE2') -> 'SE2':
+        """Group composition."""
+        R1 = self.rotation.as_matrix()
+        R2 = other.rotation.as_matrix()
+        R = SO2.from_matrix(R1 @ R2)
+        t = self.translation + R1 @ other.translation
+        return SE2(R, t)
+
+    def inverse(self) -> 'SE2':
+        """Return the inverse transformation."""
+        R_inv = self.rotation.as_matrix().T
+        R = SO2.from_matrix(R_inv)
+        t = -(R_inv @ self.translation)
+        return SE2(R, t)
+
 
 class SE3:
     def __init__(self, rotation: SO3, translation: 'np.ndarray'):
@@ -202,6 +269,11 @@ class SE3:
             )
         t = V @ rho
         return cls(R, t)
+
+    @staticmethod
+    def identity() -> 'SE3':
+        """Return the identity transformation."""
+        return SE3(SO3.exp(np.zeros(3)), np.zeros(3))
 
     def log(self) -> 'np.ndarray':
         
@@ -235,5 +307,50 @@ class SE3:
         t = m[:3, 3]
         return cls(R, t)
 
+    def __mul__(self, other: 'SE3') -> 'SE3':
+        """Group composition."""
+        R1 = self.rotation.as_matrix()
+        R2 = other.rotation.as_matrix()
+        R = SO3.from_matrix(R1 @ R2)
+        t = self.translation + R1 @ other.translation
+        return SE3(R, t)
 
-__all__ = ['Quaternion', 'SO2', 'SO3', 'SE2', 'SE3']
+    def inverse(self) -> 'SE3':
+        """Return the inverse transformation."""
+        R_inv = self.rotation.as_matrix().T
+        R = SO3.from_matrix(R_inv)
+        t = -(R_inv @ self.translation)
+        return SE3(R, t)
+
+
+def adjoint_se2(g: SE2) -> 'np.ndarray':
+    """Return the adjoint matrix of an SE2 element."""
+    R = g.rotation.as_matrix()
+    x, y = g.translation
+    adj = np.eye(3)
+    adj[:2, :2] = R
+    adj[0, 2] = -y
+    adj[1, 2] = x
+    return adj
+
+
+def adjoint_se3(g: SE3) -> 'np.ndarray':
+    """Return the adjoint matrix of an SE3 element."""
+    R = g.rotation.as_matrix()
+    t = g.translation
+    adj = np.eye(6)
+    adj[:3, :3] = R
+    adj[3:, 3:] = R
+    adj[:3, 3:] = _skew(t) @ R
+    return adj
+
+
+__all__ = [
+    'Quaternion',
+    'SO2',
+    'SO3',
+    'SE2',
+    'SE3',
+    'adjoint_se2',
+    'adjoint_se3',
+]
