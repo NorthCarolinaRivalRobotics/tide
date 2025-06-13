@@ -1,0 +1,4 @@
+# file: /workspace/tide/tide/cli/commands/up.py
+# hypothesis_version: 6.131.15
+
+['?', 'Node', 'Robot ID', 'Type', 'bold cyan', 'robot_id']

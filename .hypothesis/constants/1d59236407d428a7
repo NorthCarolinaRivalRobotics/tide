@@ -1,0 +1,4 @@
+# file: /workspace/tide/tide/components/pid_node.py
+# hypothesis_version: 6.131.15
+
+[0.0, 1.0, 'command', 'command_topic', 'controller', 'hz', 'k_d', 'k_i', 'k_p', 'reference', 'reference_topic', 'state', 'state_topic']

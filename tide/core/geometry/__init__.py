@@ -54,6 +54,12 @@ class Quaternion:
     def as_matrix(self) -> 'np.ndarray':
         """Convert quaternion to rotation matrix."""
         x, y, z, w = self.x, self.y, self.z, self.w
+        norm = math.sqrt(x * x + y * y + z * z + w * w)
+        if not math.isclose(norm, 1.0, abs_tol=1e-6):
+            x /= norm
+            y /= norm
+            z /= norm
+            w /= norm
         return np.array(
             [
                 [1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
@@ -130,7 +136,7 @@ class SO3:
         m = self.matrix
         tr = m[0, 0] + m[1, 1] + m[2, 2]
         if tr > 0:
-            s = 0.5 / np.sqrt(tr + 1.0)
+            s = 0.5 / np.sqrt(max(tr + 1.0, 0.0))
             w = 0.25 / s
             x = (m[2, 1] - m[1, 2]) * s
             y = (m[0, 2] - m[2, 0]) * s
@@ -154,7 +160,11 @@ class SO3:
                 x = (m[0, 2] + m[2, 0]) / s
                 y = (m[1, 2] + m[2, 1]) / s
                 z = 0.25 * s
-        return Quaternion(x=x, y=y, z=z, w=w)
+        q = Quaternion(x=x, y=y, z=z, w=w)
+        n = math.sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w)
+        if n == 0:
+            return q
+        return Quaternion(x=q.x / n, y=q.y / n, z=q.z / n, w=q.w / n)
 
     @classmethod
     def from_matrix(cls, m: 'np.ndarray') -> 'SO3':
