@@ -99,6 +99,10 @@ self.put(rgb_key, to_zenoh_value(rgb_image))
 # Depth images are supported with a helper as well
 depth_key = sensor_camera_depth("front")
 self.put(depth_key, to_zenoh_value(depth_image))
+
+# Build a key for another robot
+cmd_key = robot_topic("otherbot", CmdTopic.TWIST.value)
+z.put(cmd_key, to_zenoh_value(cmd_vel))
 ```
 
 Mappings such as `CMD_TYPES`, `STATE_TYPES`, and `SENSOR_TYPES` allow lookup of the expected message type for each reserved topic.

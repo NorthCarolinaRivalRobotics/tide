@@ -19,6 +19,7 @@ from tide.namespaces import (
     SensorTopic,
     sensor_camera_rgb,
     sensor_camera_depth,
+    robot_topic,
 )
 
 __all__ = [
@@ -29,5 +30,6 @@ __all__ = [
     "SensorTopic",
     "sensor_camera_rgb",
     "sensor_camera_depth",
+    "robot_topic",
     "PIDNode",
 ]

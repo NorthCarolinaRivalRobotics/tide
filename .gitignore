@@ -7,4 +7,6 @@
 *.pyzw
 *.jpg
 *.mp4
-*/__pycache__
+.hypothesis/
+*/__pycache__/
+

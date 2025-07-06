@@ -9,6 +9,7 @@ from tide.namespaces import (
     SensorTopic,
     sensor_camera_rgb,
     sensor_camera_depth,
+    robot_topic,
 )
 from tide.models import (
     Vector2,
@@ -124,4 +125,9 @@ def test_reserved_namespace_roundtrip():
         assert received == img
     finally:
         session.close()
+
+
+def test_robot_topic_builder():
+    key = robot_topic("rover", CmdTopic.TWIST.value)
+    assert key == "/rover/cmd/twist"
 
