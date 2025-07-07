@@ -73,6 +73,12 @@ def sensor_camera_depth(camera_id: str) -> str:
     return f"sensor/camera/{camera_id}/depth"
 
 
+def robot_topic(robot_id: str, topic: str) -> str:
+    """Return an absolute topic in the form ``/{robot_id}/{topic}``."""
+    topic = topic.lstrip("/")
+    return f"/{robot_id}/{topic}"
+
+
 __all__ = [
     "Group",
     "CmdTopic",
@@ -83,4 +89,5 @@ __all__ = [
     "SENSOR_TYPES",
     "sensor_camera_rgb",
     "sensor_camera_depth",
+    "robot_topic",
 ]
