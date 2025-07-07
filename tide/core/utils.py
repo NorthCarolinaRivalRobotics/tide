@@ -1,10 +1,8 @@
 import importlib
 import importlib.util
-import math
 import os
-from typing import Any, Dict, List, Mapping, Type, Tuple, Optional, Union
+from typing import Any, Dict, List, Mapping, Type, Optional, Union
 
-from tide.core.geometry import Quaternion
 
 from tide.core.node import BaseNode
 from tide.config import TideConfig
@@ -75,60 +73,3 @@ def launch_from_config(config: Union[TideConfig, Mapping[str, Any]]) -> List[Bas
         nodes.append(node)
         
     return nodes
-
-def quaternion_from_euler(roll: float, pitch: float, yaw: float) -> Quaternion:
-    """
-    Convert Euler angles to quaternion.
-    
-    Args:
-        roll: Rotation around X axis (radians)
-        pitch: Rotation around Y axis (radians)
-        yaw: Rotation around Z axis (radians)
-        
-    Returns:
-        Quaternion instance representing the rotation
-    """
-    cy = math.cos(yaw * 0.5)
-    sy = math.sin(yaw * 0.5)
-    cp = math.cos(pitch * 0.5)
-    sp = math.sin(pitch * 0.5)
-    cr = math.cos(roll * 0.5)
-    sr = math.sin(roll * 0.5)
-    
-    return Quaternion(
-        x=cy * cp * sr - sy * sp * cr,
-        y=sy * cp * sr + cy * sp * cr,
-        z=sy * cp * cr - cy * sp * sr,
-        w=cy * cp * cr + sy * sp * sr,
-    )
-
-def euler_from_quaternion(q: Quaternion) -> Tuple[float, float, float]:
-    """
-    Convert quaternion to Euler angles.
-    
-    Args:
-        q: Quaternion instance
-        
-    Returns:
-        Tuple of (roll, pitch, yaw) in radians
-    """
-    x, y, z, w = q.x, q.y, q.z, q.w
-    
-    # Roll (x-axis rotation)
-    sinr_cosp = 2 * (w * x + y * z)
-    cosr_cosp = 1 - 2 * (x * x + y * y)
-    roll = math.atan2(sinr_cosp, cosr_cosp)
-    
-    # Pitch (y-axis rotation)
-    sinp = 2 * (w * y - z * x)
-    if abs(sinp) >= 1:
-        pitch = math.copysign(math.pi / 2, sinp)  # Use 90 degrees if out of range
-    else:
-        pitch = math.asin(sinp)
-    
-    # Yaw (z-axis rotation)
-    siny_cosp = 2 * (w * z + x * y)
-    cosy_cosp = 1 - 2 * (y * y + z * z)
-    yaw = math.atan2(siny_cosp, cosy_cosp)
-    
-    return (roll, pitch, yaw) 

@@ -1,6 +1,6 @@
 import math
 
-from tide.core.utils import quaternion_from_euler, euler_from_quaternion
+from tide.models.common import Quaternion
 
 
 def test_quaternion_roundtrip():
@@ -9,8 +9,8 @@ def test_quaternion_roundtrip():
         -0.2,  # pitch
         0.3,  # yaw
     )
-    q = quaternion_from_euler(*angles)
-    recovered = euler_from_quaternion(q)
+    q = Quaternion.from_euler(*angles)
+    recovered = q.to_euler()
 
     assert math.isclose(recovered[0], angles[0], abs_tol=1e-6)
     assert math.isclose(recovered[1], angles[1], abs_tol=1e-6)

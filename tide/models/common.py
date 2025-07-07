@@ -1,4 +1,5 @@
 from datetime import datetime
+import math
 from typing import Dict, List, Optional, Union, Type
 
 try:
@@ -53,6 +54,42 @@ class Quaternion(BaseModel):
     y: float = 0.0
     z: float = 0.0
     w: float = 1.0  # Default to identity quaternion
+
+    @classmethod
+    def from_euler(cls, roll: float, pitch: float, yaw: float) -> "Quaternion":
+        """Create a quaternion from roll, pitch, yaw angles."""
+        cy = math.cos(yaw * 0.5)
+        sy = math.sin(yaw * 0.5)
+        cp = math.cos(pitch * 0.5)
+        sp = math.sin(pitch * 0.5)
+        cr = math.cos(roll * 0.5)
+        sr = math.sin(roll * 0.5)
+
+        return cls(
+            x=cy * cp * sr - sy * sp * cr,
+            y=sy * cp * sr + cy * sp * cr,
+            z=sy * cp * cr - cy * sp * sr,
+            w=cy * cp * cr + sy * sp * sr,
+        )
+
+    def to_euler(self) -> tuple[float, float, float]:
+        """Convert this quaternion to roll, pitch, yaw angles."""
+        x, y, z, w = self.x, self.y, self.z, self.w
+        sinr_cosp = 2 * (w * x + y * z)
+        cosr_cosp = 1 - 2 * (x * x + y * y)
+        roll = math.atan2(sinr_cosp, cosr_cosp)
+
+        sinp = 2 * (w * y - z * x)
+        if abs(sinp) >= 1:
+            pitch = math.copysign(math.pi / 2, sinp)
+        else:
+            pitch = math.asin(sinp)
+
+        siny_cosp = 2 * (w * z + x * y)
+        cosy_cosp = 1 - 2 * (y * y + z * z)
+        yaw = math.atan2(siny_cosp, cosy_cosp)
+
+        return roll, pitch, yaw
 
 
 class Header(BaseModel):
