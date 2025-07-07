@@ -7,8 +7,6 @@ The Tide CLI provides a set of commands to help you create, run, and manage Tide
 - [Installation](#installation)
 - [Commands](#commands)
   - [init](#init-command)
-  - [init-config](#init-config-command)
-  - [init-pingpong](#init-pingpong-command)
   - [up](#up-command)
   - [status](#status-command)
 - [Project Structure](#project-structure)
@@ -67,77 +65,6 @@ Force overwrite an existing project:
 tide init my_robot_project --force
 ```
 
-### `init-config` Command
-
-The `init-config` command creates a default configuration file without creating an entire project. This is useful for adding Tide configuration to existing projects or resetting a configuration.
-
-```bash
-tide init-config [options]
-```
-
-#### Options
-
-- `--output OUTPUT`: Output path for the configuration file (default: "config/config.yaml")
-- `--robot-id ROBOT_ID`: Specify the default robot ID (default: "myrobot")
-- `--force`: Overwrite existing file if it exists
-- `--include-node`: Also create ping and pong example nodes
-
-#### Examples
-
-Create a default configuration file:
-
-```bash
-tide init-config
-```
-
-Create a configuration file with a custom robot ID:
-
-```bash
-tide init-config --robot-id delivery1
-```
-
-Create a configuration file at a custom location:
-
-```bash
-tide init-config --output my_config.yaml
-```
-
-Create a configuration file and include example nodes:
-
-```bash
-tide init-config --include-node
-```
-
-### `init-pingpong` Command
-
-The `init-pingpong` command generates example ping and pong nodes that
-communicate with each other. It can optionally create a configuration
-file to run the examples with `tide up`.
-
-```bash
-tide init-pingpong [options]
-```
-
-#### Options
-
-- `--output-dir DIR`: Directory to create the nodes in (default: ".")
-- `--robot-id ROBOT_ID`: Default robot ID to use (default: "myrobot")
-- `--force`: Overwrite existing files
-- `--create-config`: Create a config file for the examples
-
-#### Examples
-
-Create example nodes in the current directory:
-
-```bash
-tide init-pingpong
-```
-
-Create nodes in a custom directory and generate a config file:
-
-```bash
-tide init-pingpong --output-dir examples --create-config
-```
 
 ### `up` Command
 
@@ -205,7 +132,6 @@ my_robot_project/
 │   ├── robot_node.py   # Main robot control node
 │   ├── teleop_node.py  # Node for commanding the robot
 │   └── monitor_node.py # Node for monitoring state
-├── main.py             # Project entry point
 ├── README.md           # Project documentation
 └── requirements.txt    # Dependencies
 ```
@@ -242,43 +168,6 @@ This directory contains your node implementations:
 - `robot_node.py`: The main robot control node that handles commands and publishes state
 - `teleop_node.py`: A node for generating commands to control the robot
 - `monitor_node.py`: A node for monitoring the robot state
-
-### main.py
-
-The entry point for your project:
-
-```python
-#!/usr/bin/env python3
-import sys
-import yaml
-import time
-from tide.core.utils import launch_from_config
-from tide.config import load_config
-
-def main():
-    # Load configuration
-    config = load_config("config/config.yaml")
-
-    # Launch nodes
-    nodes = launch_from_config(config)
-
-    try:
-        print(f"Started {len(nodes)} nodes. Press Ctrl+C to exit.")
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        print("Interrupted by user")
-        for node in nodes:
-            node.stop()
-    except Exception as e:
-        print(f"Error: {e}")
-        return 1
-
-    return 0
-
-if __name__ == "__main__":
-    sys.exit(main())
-```
 
 ## Example Workflows
 
@@ -361,11 +250,7 @@ If you have an existing Python project and want to add Tide functionality:
 uv add tide-sdk
 ```
 
-2. Create a default configuration file:
-
-```bash
-tide init-config --output myproject/config/tide_config.yaml --robot-id myproject-bot
-```
+2. Create a default configuration file by generating a template project and copying its `config/config.yaml`.
 
 3. Create your own Tide nodes or use the templates as a reference:
 

@@ -1,6 +1,6 @@
 # {project_name}
 
-A Tide-based robotics project that demonstrates a simple "hello world" node.
+A Tide-based robotics project demonstrating the ping/pong example.
 
 ## Getting Started
 
@@ -16,27 +16,13 @@ uv add -r requirements.txt
 tide up
 ```
 
-Or run directly with:
-
-```bash
-python main.py
-```
 
 ## Project Structure
 
-- `hello_world_node.py`: Simple example node implementation
+- `ping_node.py`: Example publisher node
+- `pong_node.py`: Example subscriber node
 - `config/`: Configuration files
-- `main.py`: Project entry point
 
-## Hello World Node
-
-This project includes a simple HelloWorldNode that:
-
-1. Connects to the Zenoh network
-2. Publishes a greeting message every second
-3. Demonstrates basic Tide node functionality
-
-You can customize the message and update rate in the config.yaml file.
 
 ## Next Steps
 
