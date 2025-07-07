@@ -110,13 +110,6 @@ def cmd_init(args) -> int:
             f.write(rendered_content)
         os.chmod(project_dir / "pong_node.py", 0o755)
         
-        # Create main.py file
-        console.print("Debug: Creating main.py")
-        template_content = read_template("main.py.template")
-        rendered_content = render_template(template_content, context)
-        with open(project_dir / "main.py", "w") as f:
-            f.write(rendered_content)
-        os.chmod(project_dir / "main.py", 0o755)
         
         # Create config.yaml file
         console.print("Debug: Creating config.yaml")
@@ -160,53 +153,3 @@ def cmd_init(args) -> int:
         console.print(f"[bold red]Error:[/bold red] {e}")
         console.print(f"[red]Traceback:[/red] {traceback.format_exc()}")
         return 1
-
-# Also make the init function available for use by init_config command
-# This way both commands are still available but init includes the config functionality
-def create_config_only(config_path: str, robot_id: str, force: bool = False) -> int:
-    """
-    Create a configuration file without creating a full project.
-    This function is used by the init_config command.
-    
-    Args:
-        config_path: Path to create the config file
-        robot_id: Robot ID to use in the config
-        force: Whether to overwrite existing files
-        
-    Returns:
-        Exit code
-    """
-    # Check if file exists and should not overwrite
-    if os.path.exists(config_path) and not force:
-        console.print(f"[bold red]Error:[/bold red] File '{config_path}' already exists.")
-        console.print("Use --force to overwrite.")
-        return 1
-    
-    # Ensure parent directory exists
-    output_file = Path(config_path)
-    output_file.parent.mkdir(parents=True, exist_ok=True)
-    
-    # Prepare template context
-    context = {
-        "robot_id": robot_id
-    }
-    
-    try:
-        # Load config template
-        template_content = read_template("config/config.yaml.template")
-        
-        # Render template
-        rendered_content = render_template(template_content, context)
-        
-        # Write file
-        with open(output_file, "w") as f:
-            f.write(rendered_content)
-        
-        console.print(f"[bold green]Default configuration created at:[/bold green] {config_path}")
-        console.print(f"Robot ID: [bold]{robot_id}[/bold]")
-        
-        return 0
-        
-    except Exception as e:
-        console.print(f"[bold red]Error:[/bold red] {e}")
-        return 1 

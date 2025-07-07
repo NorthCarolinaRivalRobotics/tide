@@ -6,8 +6,6 @@ import pytest
 
 from tide.cli.main import create_parser
 from tide.cli.commands.init import cmd_init
-from tide.cli.commands.init_pingpong import cmd_init_pingpong
-from tide.cli.commands.init_config import cmd_init_config
 from tide.cli.commands.status import cmd_status
 from tide.cli.commands.up import cmd_up
 
@@ -20,54 +18,14 @@ def test_parser_parses_init():
     assert args.robot_id == 'r2'
 
 
-def test_parser_parses_init_config_include_node():
+def test_parser_rejects_removed_commands():
     parser = create_parser()
-    args = parser.parse_args(['init-config', '--include-node'])
-    assert args.command == 'init-config'
-    assert args.include_node is True
-
-    args_default = parser.parse_args(['init-config'])
-    assert args_default.command == 'init-config'
-    assert args_default.include_node is False
+    with pytest.raises(SystemExit):
+        parser.parse_args(['init-config'])
+    with pytest.raises(SystemExit):
+        parser.parse_args(['init-pingpong'])
 
 
-def test_cmd_init_pingpong(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
-    args = argparse.Namespace(robot_id='r1', force=False, output_dir=str(tmp_path))
-    result = cmd_init_pingpong(args)
-    assert result == 0
-    assert (tmp_path / 'ping_node.py').exists()
-    assert (tmp_path / 'pong_node.py').exists()
-
-
-def test_cmd_init_pingpong_outside_cwd(tmp_path):
-    args = argparse.Namespace(robot_id='r1', force=False, output_dir=str(tmp_path), create_config=True)
-    result = cmd_init_pingpong(args)
-    assert result == 0
-    assert (tmp_path / 'ping_node.py').exists()
-    assert (tmp_path / 'pong_node.py').exists()
-    assert (tmp_path / 'config' / 'pingpong_config.yaml').exists()
-
-
-def test_cmd_init_config(tmp_path):
-    cfg = tmp_path / 'config.yaml'
-    args = argparse.Namespace(output=str(cfg), robot_id='r1', force=False, include_node=False)
-    result = cmd_init_config(args)
-    assert result == 0
-    assert cfg.exists()
-
-
-def test_cmd_init_config_with_nodes(tmp_path):
-    cfg_dir = tmp_path / "config"
-    cfg_dir.mkdir()
-    cfg = cfg_dir / "config.yaml"
-    args = argparse.Namespace(output=str(cfg), robot_id='r1', force=False, include_node=True)
-    result = cmd_init_config(args)
-    assert result == 0
-    assert cfg.exists()
-    # nodes should be created alongside the config parent directory
-    assert (tmp_path / 'ping_node.py').exists()
-    assert (tmp_path / 'pong_node.py').exists()
 
 
 def test_cmd_init_creates_project(tmp_path, monkeypatch):
