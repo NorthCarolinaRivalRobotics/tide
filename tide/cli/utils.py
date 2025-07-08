@@ -116,7 +116,10 @@ def discover_nodes(timeout: float = 2.0) -> List[Dict[str, Any]]:
             # Process any new replies
             for reply in replies:
                 if hasattr(reply, 'ok'):
-                    key_parts = reply.ok.key_expr.to_string().split('/')
+                    # KeyExpr objects in the Python zenoh bindings do not
+                    # implement a `to_string()` method. Casting to `str` works
+                    # across versions, so use that to retrieve the key text.
+                    key_parts = str(reply.ok.key_expr).split('/')
                     if len(key_parts) >= 3:
                         # key_parts contains [robot_id, group, ...]
                         robot_id = key_parts[0]
