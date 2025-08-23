@@ -244,7 +244,9 @@ This demonstrates:
 
 Tide ships with a small library of reusable nodes.  `PIDNode` implements a
 basic PID controller that reads a state and reference value and publishes a
-command.  See [docs/pid_node.md](docs/pid_node.md) for configuration details.
+command.  `WebcamNode` captures frames from a V4L2 webcam and publishes raw
+images.  See [docs/pid_node.md](docs/pid_node.md) and
+[docs/webcam_node.md](docs/webcam_node.md) for configuration details.
 
 ## License
 
