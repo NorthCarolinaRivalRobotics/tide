@@ -11,7 +11,7 @@ from tide.components.webcam_node import WebcamNode
 import cv2
 
 
-CAM = os.getenv("TEST_CAMERA", "/dev/video0") or
+CAM = os.getenv("TEST_CAMERA", "/dev/video0")
 
 
 class ImageRecorder(BaseNode):
