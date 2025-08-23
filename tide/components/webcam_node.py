@@ -34,9 +34,8 @@ class WebcamNode(BaseNode):
             self.width = cfg.get("width")
             self.height = cfg.get("height")
 
-        self.output_topic = cfg.get("output_topic")
-        if not self.output_topic:
-            self.output_topic = sensor_camera_rgb(str(self.camera_id))
+        self.output_topic = cfg.get("output_topic") or sensor_camera_rgb(str(self.camera_id))
+
 
         self.hz = float(cfg.get("hz", self.hz))
 
