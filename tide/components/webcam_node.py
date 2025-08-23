@@ -49,7 +49,7 @@ class WebcamNode(BaseNode):
         try:
             import cv2
 
-            self.cap = cv2.VideoCapture(self.camera_id, cv2.CAP_V4L2)
+            self.cap = cv2.VideoCapture(self.camera_id)
             if self.width:
                 self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, int(self.width))
             if self.height:
