@@ -75,11 +75,7 @@ class WebcamNode(BaseNode):
 
         if self.crop_stereo_to_monocular:
             half = frame.shape[1] // 2
-            if self.crop_to_left:
-                frame = frame[:, :half]
-            else:
-                frame = frame[:, half:]
-
+            frame = frame[:, :half] if self.crop_to_left else frame[:, half:]
         height, width, channels = frame.shape
         img = Image(
             height=height,
