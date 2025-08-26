@@ -9,8 +9,7 @@ from tide.config import TideConfig, NodeConfig
 from tide.models.common import Image
 from tide.components.webcam_node import WebcamNode
 
-# Skip tests if OpenCV (or required system libraries) are unavailable
-cv2 = pytest.importorskip("cv2", exc_type=ImportError)
+import cv2
 
 
 CAM = os.getenv("TEST_CAMERA", "/dev/video0")
