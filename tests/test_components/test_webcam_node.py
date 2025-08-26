@@ -8,6 +8,7 @@ from tide.core.utils import launch_from_config
 from tide.config import TideConfig, NodeConfig
 from tide.models.common import Image
 from tide.components.webcam_node import WebcamNode
+
 import cv2
 
 

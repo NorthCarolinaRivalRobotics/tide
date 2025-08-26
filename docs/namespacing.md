@@ -66,6 +66,27 @@ The above could publish a custom status object describing the claw
 position or whether it is open or closed. Commands may be sent with
 `manipulator/cmd/claw` or similar topics.
 
+## Motor Topics (`motors`)
+
+Individual motor control and feedback use the `motors` group with a
+numeric motor identifier:
+
+| Topic | Message Type | Description |
+|-------|--------------|-------------|
+| `motors/{id}/cmd_pos` | `MotorPosition` | Set target position in rotations |
+| `motors/{id}/cmd_vel` | `MotorVelocity` | Set target velocity in rotations/sec |
+| `motors/{id}/pos` | `MotorPosition` | Current motor position in rotations |
+| `motors/{id}/vel` | `MotorVelocity` | Current motor velocity in rotations/sec |
+
+Helper functions in `tide.namespaces` build these topics:
+
+```python
+from tide.namespaces import motor_cmd_pos, motor_pos
+
+cmd_key = motor_cmd_pos(1)  # "motors/1/cmd_pos"
+state_key = motor_pos(1)    # "motors/1/pos"
+```
+
 ## Custom Groups
 
 Groups other than the ones listed above are unreserved. Examples used in

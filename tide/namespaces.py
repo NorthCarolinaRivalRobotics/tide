@@ -73,6 +73,26 @@ def sensor_camera_depth(camera_id: str) -> str:
     return f"sensor/camera/{camera_id}/depth"
 
 
+def motor_cmd_pos(motor_id: int) -> str:
+    """Topic for commanding a motor position in rotations."""
+    return f"motors/{motor_id}/cmd_pos"
+
+
+def motor_cmd_vel(motor_id: int) -> str:
+    """Topic for commanding a motor velocity in rotations/sec."""
+    return f"motors/{motor_id}/cmd_vel"
+
+
+def motor_pos(motor_id: int) -> str:
+    """Topic publishing a motor's current position in rotations."""
+    return f"motors/{motor_id}/pos"
+
+
+def motor_vel(motor_id: int) -> str:
+    """Topic publishing a motor's current velocity in rotations/sec."""
+    return f"motors/{motor_id}/vel"
+
+
 def robot_topic(robot_id: str, topic: str) -> str:
     """Return an absolute topic in the form ``/{robot_id}/{topic}``."""
     topic = topic.lstrip("/")
@@ -89,5 +109,9 @@ __all__ = [
     "SENSOR_TYPES",
     "sensor_camera_rgb",
     "sensor_camera_depth",
+    "motor_cmd_pos",
+    "motor_cmd_vel",
+    "motor_pos",
+    "motor_vel",
     "robot_topic",
 ]
