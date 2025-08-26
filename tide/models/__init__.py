@@ -12,6 +12,8 @@ from tide.models.common import (
     OccupancyGrid2D,
     LaserScan,
     Image,
+    MotorPosition,
+    MotorVelocity,
 )
 
 from tide.models.serialization import (
@@ -49,6 +51,8 @@ __all__ = [
     'OccupancyGrid2D',
     'LaserScan',
     'Image',
+    'MotorPosition',
+    'MotorVelocity',
     
     # Serialization utilities
     'to_json',

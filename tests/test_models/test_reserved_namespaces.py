@@ -9,6 +9,10 @@ from tide.namespaces import (
     SensorTopic,
     sensor_camera_rgb,
     sensor_camera_depth,
+    motor_cmd_pos,
+    motor_cmd_vel,
+    motor_pos,
+    motor_vel,
     robot_topic,
 )
 from tide.models import (
@@ -20,6 +24,8 @@ from tide.models import (
     Pose3D,
     LaserScan,
     Image,
+    MotorPosition,
+    MotorVelocity,
 )
 from tide.models.serialization import to_zenoh_value, from_zenoh_value
 
@@ -123,6 +129,20 @@ def test_reserved_namespace_roundtrip():
         key = f"{robot}/" + sensor_camera_depth("front")
         received = _roundtrip(session, key, img, Image)
         assert received == img
+
+        # Motor topics
+        pos_msg = MotorPosition(rotations=1.5)
+        vel_msg = MotorVelocity(rotations_per_sec=2.0)
+        motor_cases = [
+            (motor_cmd_pos, pos_msg, MotorPosition),
+            (motor_cmd_vel, vel_msg, MotorVelocity),
+            (motor_pos, pos_msg, MotorPosition),
+            (motor_vel, vel_msg, MotorVelocity),
+        ]
+        for builder, msg, model in motor_cases:
+            key = f"{robot}/" + builder(1)
+            received = _roundtrip(session, key, msg, model)
+            assert received == msg
     finally:
         session.close()
 

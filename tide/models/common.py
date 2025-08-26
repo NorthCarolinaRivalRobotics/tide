@@ -126,4 +126,16 @@ class Image(TideMessage):
     encoding: str  # rgb8, bgr8, mono8, etc.
     is_bigendian: bool = False
     step: int  # Full row length in bytes
-    data: bytes 
+    data: bytes
+
+
+class MotorPosition(TideMessage):
+    """Motor position expressed in full rotations."""
+
+    rotations: float = 0.0
+
+
+class MotorVelocity(TideMessage):
+    """Motor velocity in rotations per second."""
+
+    rotations_per_sec: float = 0.0
