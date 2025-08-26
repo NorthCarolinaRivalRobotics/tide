@@ -2,6 +2,22 @@
 
 This document outlines the step-by-step process for creating a new release of the tide-sdk package.
 
+## Automated Release
+
+The easiest way to cut a new release is via the **Manual Release** workflow
+found in the GitHub Actions tab. Trigger the workflow and provide the desired
+version (e.g. `0.1.9`). The workflow will:
+
+1. Run the test suite
+2. Bump the version in `pyproject.toml`, `tide/__init__.py`, and `setup.py`
+3. Commit the changes to `main`
+4. Create and push a `vX.Y.Z` tag
+
+Pushing the tag automatically kicks off the existing **Publish Python package**
+workflow which builds the package and uploads it to PyPI using OpenID Connect.
+
+If you prefer to perform the release manually, follow the steps below.
+
 ## Prerequisites
 
 - Ensure you have push access to the repository
