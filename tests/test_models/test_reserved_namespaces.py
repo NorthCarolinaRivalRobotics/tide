@@ -7,6 +7,7 @@ from tide.namespaces import (
     CmdTopic,
     StateTopic,
     SensorTopic,
+    RobotTopic,
     sensor_camera_rgb,
     sensor_camera_depth,
     motor_cmd_pos,
@@ -111,6 +112,10 @@ def test_reserved_namespace_roundtrip():
             (
                 SensorTopic.IMU_ACCEL,
                 Vector3(x=0.1, y=0.2, z=0.3),
+            ),
+            (
+                RobotTopic.ORIENTATION_QUAT,
+                Quaternion(x=0.0, y=0.0, z=0.0, w=1.0),
             ),
         ]
 

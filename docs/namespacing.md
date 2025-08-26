@@ -36,6 +36,14 @@ Topics under `state` report the current state of a robot.
 | `state/pose3d` | `Pose3D` | Current 3D pose |
 | `state/twist`  | `Twist2D` or `Twist3D` | Current velocity |
 
+## Robot Topics (`robot`)
+
+Topics under `robot` describe properties of the robot itself.
+
+| Topic | Message Type | Description |
+|-------|--------------|-------------|
+| `robot/orientation/quat` | `Quaternion` | Robot orientation represented as a quaternion |
+
 ## Sensor Topics (`sensor`)
 
 Sensor data is published under the `sensor` group. Common examples include:
@@ -105,7 +113,7 @@ Tide provides enums representing all reserved groups and topics in `tide.namespa
 
 ```python
 from tide import Group, CmdTopic, StateTopic, SensorTopic,
-    sensor_camera_rgb, sensor_camera_depth
+    RobotTopic, sensor_camera_rgb, sensor_camera_depth
 
 # Subscribe to a reserved topic using the enum value
 self.subscribe(CmdTopic.TWIST.value, self._on_cmd_vel)
@@ -126,4 +134,4 @@ cmd_key = robot_topic("otherbot", CmdTopic.TWIST.value)
 z.put(cmd_key, to_zenoh_value(cmd_vel))
 ```
 
-Mappings such as `CMD_TYPES`, `STATE_TYPES`, and `SENSOR_TYPES` allow lookup of the expected message type for each reserved topic.
+Mappings such as `CMD_TYPES`, `STATE_TYPES`, `SENSOR_TYPES`, and `ROBOT_TYPES` allow lookup of the expected message type for each reserved topic.

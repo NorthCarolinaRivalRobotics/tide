@@ -8,6 +8,7 @@ from tide.models import (
     Vector3,
     LaserScan,
     Image,
+    Quaternion,
 )
 
 
@@ -18,6 +19,7 @@ class Group(str, Enum):
     STATE = "state"
     SENSOR = "sensor"
     MANIPULATOR = "manipulator"
+    ROBOT = "robot"
 
 
 class CmdTopic(str, Enum):
@@ -63,6 +65,17 @@ SENSOR_TYPES: Dict[SensorTopic, Type] = {
 }
 
 
+class RobotTopic(str, Enum):
+    """Reserved robot topics."""
+
+    ORIENTATION_QUAT = "robot/orientation/quat"
+
+
+ROBOT_TYPES: Dict[RobotTopic, Type] = {
+    RobotTopic.ORIENTATION_QUAT: Quaternion,
+}
+
+
 def sensor_camera_rgb(camera_id: str) -> str:
     """Return the RGB camera topic for the given camera id."""
     return f"sensor/camera/{camera_id}/rgb"
@@ -104,9 +117,11 @@ __all__ = [
     "CmdTopic",
     "StateTopic",
     "SensorTopic",
+    "RobotTopic",
     "CMD_TYPES",
     "STATE_TYPES",
     "SENSOR_TYPES",
+    "ROBOT_TYPES",
     "sensor_camera_rgb",
     "sensor_camera_depth",
     "motor_cmd_pos",
