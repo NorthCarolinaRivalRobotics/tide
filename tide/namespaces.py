@@ -57,22 +57,13 @@ class SensorTopic(str, Enum):
 
     LIDAR_SCAN = "sensor/lidar/scan"
     IMU_ACCEL = "sensor/imu/accel"
+    IMU_QUAT = "sensor/imu/quat"
 
 
 SENSOR_TYPES: Dict[SensorTopic, Type] = {
     SensorTopic.LIDAR_SCAN: LaserScan,
     SensorTopic.IMU_ACCEL: Vector3,
-}
-
-
-class RobotTopic(str, Enum):
-    """Reserved robot topics."""
-
-    ORIENTATION_QUAT = "robot/orientation/quat"
-
-
-ROBOT_TYPES: Dict[RobotTopic, Type] = {
-    RobotTopic.ORIENTATION_QUAT: Quaternion,
+    SensorTopic.IMU_QUAT: Quaternion,
 }
 
 
@@ -117,11 +108,9 @@ __all__ = [
     "CmdTopic",
     "StateTopic",
     "SensorTopic",
-    "RobotTopic",
     "CMD_TYPES",
     "STATE_TYPES",
     "SENSOR_TYPES",
-    "ROBOT_TYPES",
     "sensor_camera_rgb",
     "sensor_camera_depth",
     "motor_cmd_pos",
