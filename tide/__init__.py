@@ -5,7 +5,7 @@ This framework provides a lightweight, strongly-typed layer
 on top of Zenoh for building robot control systems.
 """
 
-__version__ = "0.1.10"
+__version__ = "0.1.11"
 
 # Import core components
 from tide.core.node import BaseNode
