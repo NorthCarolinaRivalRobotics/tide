@@ -146,17 +146,19 @@ def main():
     # Load configuration
     config = load_config('config.yaml')
 
-    # Launch nodes
-    nodes = launch_from_config(config)
+    # Launch nodes and external scripts
+    nodes, processes = launch_from_config(config)
 
     try:
-        print(f"Started {len(nodes)} nodes. Press Ctrl+C to exit.")
+        print(f"Started {len(nodes)} nodes and {len(processes)} scripts. Press Ctrl+C to exit.")
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
         print("Interrupted by user")
         for node in nodes:
             node.stop()
+        for proc in processes:
+            proc.terminate()
 
 if __name__ == "__main__":
     main()
@@ -167,6 +169,9 @@ if __name__ == "__main__":
 ```yaml
 session:
   mode: peer  # Mesh network
+
+scripts:
+  - ./tools/my_helper.py
 
 nodes:
   - type: my_package.MyRobotNode

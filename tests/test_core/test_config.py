@@ -45,6 +45,7 @@ def test_launch_from_config_with_model(monkeypatch):
 
     monkeypatch.setattr(utils, "create_node", lambda t, p: Dummy(p))
 
-    nodes = utils.launch_from_config(cfg)
+    nodes, procs = utils.launch_from_config(cfg)
     assert len(nodes) == 1
+    assert procs == []
     assert created[0].config == {}

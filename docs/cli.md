@@ -269,9 +269,9 @@ def start_tide_nodes():
     # Load Tide configuration
     config = load_config("config/tide_config.yaml")
 
-    # Launch Tide nodes
-    nodes = launch_from_config(config)
-    return nodes
+    # Launch Tide nodes and scripts
+    nodes, processes = launch_from_config(config)
+    return nodes, processes
 ```
 
 ### Custom Node Development

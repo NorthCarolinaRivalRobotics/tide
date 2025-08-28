@@ -37,17 +37,23 @@ def main():
             print("Configuration looks valid!")
             return 0
             
-        # Launch nodes from config
-        nodes = launch_from_config(config)
-        
-        print(f"Started {len(nodes)} nodes. Press Ctrl+C to exit.")
-        
+        # Launch nodes and scripts from config
+        nodes, processes = launch_from_config(config)
+
+        print(f"Started {len(nodes)} nodes and {len(processes)} scripts. Press Ctrl+C to exit.")
+
         # Set up signal handler for graceful shutdown
         def signal_handler(sig, frame):
             print("Interrupted by user")
             # Stop all nodes
             for node in nodes:
                 node.stop()
+            # Terminate external processes
+            for proc in processes:
+                try:
+                    proc.terminate()
+                except Exception:
+                    pass
             sys.exit(0)
             
         signal.signal(signal.SIGINT, signal_handler)

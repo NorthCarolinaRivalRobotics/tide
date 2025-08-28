@@ -1,6 +1,9 @@
 session:
   mode: peer  # Mesh network
 
+scripts:
+  - echo "Starting helper"
+
 nodes:
   - type: examples.simple_robot.SimpleRobotNode
     params:
