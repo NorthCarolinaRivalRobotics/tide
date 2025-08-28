@@ -74,7 +74,7 @@ def test_pid_node_basic():
         ]
     )
 
-    nodes = launch_from_config(cfg)
+    nodes, procs = launch_from_config(cfg)
 
     # Allow time for messages to be exchanged
     time.sleep(0.5)
@@ -84,6 +84,8 @@ def test_pid_node_basic():
     for n in nodes:
         for t in n.threads:
             t.join(timeout=1.0)
+    for p in procs:
+        p.terminate()
 
     recorder = nodes[-1]
     assert getattr(recorder, "received", None), "no command published"

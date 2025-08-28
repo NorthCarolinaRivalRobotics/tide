@@ -1,4 +1,5 @@
 import argparse
+import sys
 from types import SimpleNamespace
 from unittest import mock
 
@@ -81,10 +82,42 @@ def test_cmd_up(monkeypatch, tmp_path):
     args = argparse.Namespace(config=str(cfg_file))
 
     dummy_node = SimpleNamespace(threads=[object()], stop=mock.Mock())
-    monkeypatch.setattr('tide.cli.commands.up.launch_from_config', lambda cfg: [dummy_node])
+    monkeypatch.setattr('tide.cli.commands.up.launch_from_config', lambda cfg: ([dummy_node], []))
     with pytest.raises(SystemExit):
         cmd_up(args, run_duration=0.1)
     dummy_node.stop.assert_called()
+
+
+def test_cmd_up_runs_scripts(tmp_path):
+    script = tmp_path / 'helper.py'
+    script.write_text(
+        "import signal, sys, time, pathlib\n"
+        "start = pathlib.Path(sys.argv[1])\n"
+        "stop = pathlib.Path(sys.argv[2])\n"
+        "start.write_text('start')\n"
+        "def handler(signum, frame):\n"
+        "    stop.write_text('stop')\n"
+        "    sys.exit(0)\n"
+        "signal.signal(signal.SIGTERM, handler)\n"
+        "signal.signal(signal.SIGINT, handler)\n"
+        "while True:\n"
+        "    time.sleep(0.1)\n"
+    )
+
+    start_file = tmp_path / 'started'
+    stop_file = tmp_path / 'stopped'
+    cmd = f"{sys.executable} {script} {start_file} {stop_file}"
+    cfg_file = tmp_path / 'config.yaml'
+    cfg_file.write_text(
+        f"session:\n  mode: peer\nscripts:\n  - {cmd}\nnodes: []\n"
+    )
+
+    args = argparse.Namespace(config=str(cfg_file))
+    with pytest.raises(SystemExit):
+        cmd_up(args, run_duration=0.2)
+
+    assert start_file.exists()
+    assert stop_file.exists()
 
 
 def test_discover_nodes_parses_keys():

@@ -59,7 +59,7 @@ def test_webcam_node_integration():
         ]
     )
 
-    nodes = launch_from_config(cfg)
+    nodes, procs = launch_from_config(cfg)
 
     # Allow some time for the camera to produce a frame
     time.sleep(1.0)
@@ -69,6 +69,8 @@ def test_webcam_node_integration():
     for n in nodes:
         for t in n.threads:
             t.join(timeout=1.0)
+    for p in procs:
+        p.terminate()
 
     recorder = nodes[-1]
     assert getattr(recorder, "received", None), "no frame received"

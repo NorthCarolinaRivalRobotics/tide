@@ -2,6 +2,8 @@ import importlib
 import importlib.util
 import math
 import os
+import shlex
+import subprocess
 from typing import Any, Dict, List, Mapping, Type, Tuple, Optional, Union
 
 from tide.core.geometry import Quaternion
@@ -58,12 +60,13 @@ def create_node(node_type: str, params: Dict[str, Any] = None) -> BaseNode:
     node_class = import_class(node_type)
     return node_class(config=params)
 
-def launch_from_config(config: Union[TideConfig, Mapping[str, Any]]) -> List[BaseNode]:
-    """Launch a set of nodes from a configuration object or mapping."""
+def launch_from_config(config: Union[TideConfig, Mapping[str, Any]]) -> Tuple[List[BaseNode], List[subprocess.Popen]]:
+    """Launch nodes and external scripts from a configuration object or mapping."""
 
     cfg = config if isinstance(config, TideConfig) else TideConfig.model_validate(config)
 
     nodes: List[BaseNode] = []
+    processes: List[subprocess.Popen] = []
 
     # Configure session (placeholder for future extensions)
     _session_cfg = cfg.session
@@ -73,8 +76,16 @@ def launch_from_config(config: Union[TideConfig, Mapping[str, Any]]) -> List[Bas
         node = create_node(node_cfg.type, node_cfg.params)
         node.start()
         nodes.append(node)
-        
-    return nodes
+
+    # Launch external scripts
+    for cmd in getattr(cfg, "scripts", []):
+        try:
+            process = subprocess.Popen(shlex.split(cmd))
+            processes.append(process)
+        except Exception:
+            pass
+
+    return nodes, processes
 
 def quaternion_from_euler(roll: float, pitch: float, yaw: float) -> Quaternion:
     """

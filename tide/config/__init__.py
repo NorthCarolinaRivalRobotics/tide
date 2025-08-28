@@ -32,6 +32,7 @@ class TideConfig(BaseModel):
 
     session: SessionConfig = Field(default_factory=SessionConfig)
     nodes: List[NodeConfig] = Field(default_factory=list)
+    scripts: List[str] = Field(default_factory=list, description="Commands to run as external processes")
 
 
 def load_config(source: Union[str, Path, Mapping[str, Any]]) -> TideConfig:

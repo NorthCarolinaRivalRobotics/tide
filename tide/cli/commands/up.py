@@ -8,6 +8,7 @@ import yaml
 import signal
 import traceback
 import sys
+import subprocess
 from typing import Dict, Any, List, Optional
 
 from rich.table import Table
@@ -60,9 +61,10 @@ def cmd_up(args, *, run_duration: Optional[float] = None) -> int:
         )
     
     console.print(node_table)
-    console.print("\n[bold]Starting nodes...[/bold]")
-    
-    nodes = []  # Initialize nodes list
+    console.print("\n[bold]Starting nodes and scripts...[/bold]")
+
+    nodes: List[BaseNode] = []  # Initialize nodes list
+    processes: List[subprocess.Popen] = []
     shutdown_in_progress = False
     
     # Define signal handler with proper closure
@@ -75,23 +77,38 @@ def cmd_up(args, *, run_duration: Optional[float] = None) -> int:
             
         shutdown_in_progress = True
         console.print("\n[bold yellow]Shutting down...[/bold yellow]")
-        
+
         # Stop all nodes
         for node in nodes:
             try:
                 node.stop()
-            except Exception as e:
-                # Just log errors during shutdown
+            except Exception:
                 pass
-                
-        console.print("[bold green]Nodes stopped.[/bold green]")
+
+        # Terminate external processes
+        for proc in processes:
+            try:
+                proc.terminate()
+            except Exception:
+                pass
+
+        for proc in processes:
+            try:
+                proc.wait(timeout=5)
+            except Exception:
+                try:
+                    proc.kill()
+                except Exception:
+                    pass
+
+        console.print("[bold green]Nodes and scripts stopped.[/bold green]")
         sys.exit(0)
     
     try:
         # Launch nodes from config
-        nodes = launch_from_config(config)
-        
-        console.print(f"[bold green]Started {len(nodes)} nodes.[/bold green]")
+        nodes, processes = launch_from_config(config)
+
+        console.print(f"[bold green]Started {len(nodes)} nodes and {len(processes)} scripts.[/bold green]")
         console.print("[italic]Press Ctrl+C to exit.[/italic]")
         
         # Verify that each node has threads

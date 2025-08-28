@@ -7,6 +7,8 @@ Tide projects are configured using a YAML file describing the Zenoh session and 
 ```yaml
 session:
   mode: peer
+scripts:
+  - ./tools/my_helper.py
 nodes:
   - type: mypackage.MyNode
     name: optional-name
@@ -27,5 +29,10 @@ A list of node definitions. Each item accepts the following fields:
 - **params** (mapping, optional): Parameters passed to the node constructor.
 
 Any unknown keys will raise a validation error when the configuration is loaded.
+
+### `scripts`
+
+List of shell commands to run as separate processes alongside Tide nodes. Each item is a string command.
+The processes receive a termination signal when the Tide project shuts down.
 
 Use `tide.config.load_config()` to read and validate a configuration file. The function returns a `TideConfig` instance which can be passed to `tide.core.utils.launch_from_config()`.
