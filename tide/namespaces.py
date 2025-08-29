@@ -58,12 +58,14 @@ class SensorTopic(str, Enum):
     LIDAR_SCAN = "sensor/lidar/scan"
     IMU_ACCEL = "sensor/imu/accel"
     IMU_QUAT = "sensor/imu/quat"
+    IMU_GYRO_VEL = "sensor/imu/gyro_vel"
 
 
 SENSOR_TYPES: Dict[SensorTopic, Type] = {
     SensorTopic.LIDAR_SCAN: LaserScan,
     SensorTopic.IMU_ACCEL: Vector3,
     SensorTopic.IMU_QUAT: Quaternion,
+    SensorTopic.IMU_GYRO_VEL: Vector3,
 }
 
 

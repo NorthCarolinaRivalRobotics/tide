@@ -116,6 +116,10 @@ def test_reserved_namespace_roundtrip():
                 SensorTopic.IMU_QUAT,
                 Quaternion(x=0.0, y=0.0, z=0.0, w=1.0),
             ),
+            (
+                SensorTopic.IMU_GYRO_VEL,
+                Vector3(x=0.4, y=0.5, z=0.6),
+            ),
         ]
 
         for topic, msg in cases:

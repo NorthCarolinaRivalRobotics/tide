@@ -45,6 +45,7 @@ Sensor data is published under the `sensor` group. Common examples include:
 | `sensor/lidar/scan` | `LaserScan` | 2D lidar data |
 | `sensor/imu/accel`  | `Vector3`   | IMU acceleration |
 | `sensor/imu/quat`   | `Quaternion`| IMU orientation as a quaternion |
+| `sensor/imu/gyro_vel` | `Vector3` | IMU angular velocity |
 | `sensor/camera/{camera_id}/rgb` | `Image` | RGB image from the named camera |
 | `sensor/camera/{camera_id}/depth` | `Image` | Depth image from the named camera |
 
