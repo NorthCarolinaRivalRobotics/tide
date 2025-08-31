@@ -68,8 +68,13 @@ class MuxNode(BaseNode):
     def _import_string(self, path: str) -> Type[Any]:
         """Import a class from a fully qualified path."""
         module_name, class_name = path.rsplit(".", 1)
-        module = __import__(module_name, fromlist=[class_name])
-        return getattr(module, class_name)
+        try:
+            module = __import__(module_name, fromlist=[class_name])
+            return getattr(module, class_name)
+        except (ImportError, AttributeError) as exc:
+            raise ImportError(
+                f"Could not import '{path}'. Error: {exc}"
+            ) from exc
 
     def _maybe_convert(self, msg: Any) -> Any:
         if self.msg_type and isinstance(msg, dict) and issubclass(self.msg_type, BaseModel):
