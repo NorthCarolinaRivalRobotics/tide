@@ -135,6 +135,20 @@ class MyRobotNode(BaseNode):
         self.put(StateTopic.POSE2D.value, to_zenoh_value(pose))
 ```
 
+### Simplifying Project Imports
+
+Standalone Tide nodes sometimes need to import other modules from the project
+root. Instead of manually manipulating ``sys.path``, use the helper:
+
+```python
+from tide.core.utils import add_project_root_to_path
+
+add_project_root_to_path(__file__)
+```
+
+This mirrors the common pattern
+``sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))``.
+
 ### Launching Nodes
 
 ```python

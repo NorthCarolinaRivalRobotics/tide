@@ -4,6 +4,7 @@ import math
 import os
 import shlex
 import subprocess
+import sys
 from typing import Any, Dict, List, Mapping, Type, Tuple, Optional, Union
 
 from tide.core.geometry import Quaternion
@@ -45,6 +46,29 @@ def import_class(class_path: str) -> Type:
             
             # If we get here, we couldn't find the module
             raise
+
+
+def add_project_root_to_path(file_path: str, levels: int = 2) -> str:
+    """Add an ancestor directory of ``file_path`` to ``sys.path``.
+
+    This mirrors the common pattern used in standalone Tide nodes:
+
+    ``sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))``
+
+    Args:
+        file_path: Typically ``__file__`` from the caller.
+        levels: Number of parent directories to ascend. Defaults to 2.
+
+    Returns:
+        The directory added to ``sys.path``.
+    """
+
+    path = os.path.abspath(file_path)
+    for _ in range(levels):
+        path = os.path.dirname(path)
+    if path not in sys.path:
+        sys.path.append(path)
+    return path
 
 def create_node(node_type: str, params: Dict[str, Any] = None) -> BaseNode:
     """
