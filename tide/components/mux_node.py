@@ -80,8 +80,9 @@ class MuxNode(BaseNode):
         if self.msg_type and isinstance(msg, dict) and issubclass(self.msg_type, BaseModel):
             try:
                 return self.msg_type.model_validate(msg)
-            except Exception:
-                pass
+            except Exception as exc:
+                import logging
+                logging.exception("Validation error in _maybe_convert for type %s: %s", self.msg_type, exc)
         return msg
 
     def step(self) -> None:
