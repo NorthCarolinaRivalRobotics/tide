@@ -90,9 +90,8 @@ class MuxNode(BaseNode):
         for entry in self.inputs:
             topic = entry["topic"]
             val = self.take(topic)
-            if val is not None:
-                if not published:
-                    self.put(self.output_topic, self._maybe_convert(val))
-                    published = True
-                # else: higher-priority message already published; discard
+            if val is not None and not published:
+                self.put(self.output_topic, self._maybe_convert(val))
+                published = True
+
         # Nothing to do if no messages were received this cycle
