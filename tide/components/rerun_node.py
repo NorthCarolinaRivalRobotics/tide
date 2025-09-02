@@ -168,10 +168,11 @@ class RerunNode(BaseNode):
             return LaserScan
         if "occup" in t or "grid" in t:
             return OccupancyGrid2D
-        if "motor" in t and "velocity" in t:
-            return MotorVelocity
-        if "motor" in t and "position" in t:
-            return MotorPosition
+        if "motor" in t:
+            if "velocity" in t:
+                return MotorVelocity
+            if "position" in t:
+                return MotorPosition
         return dict
 
     # ------------------------------------------------------------------
