@@ -180,7 +180,7 @@ class RerunNode(BaseNode):
             return
         try:
             msg = msg_type.model_validate(data)
-        except Exception:
+        except (ValueError, TypeError):
             return
 
         logger = _LOGGERS.get(msg_type)
