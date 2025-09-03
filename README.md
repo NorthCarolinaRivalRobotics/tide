@@ -270,3 +270,11 @@ images.  See [docs/pid_node.md](docs/pid_node.md) and
 ## License
 
 MIT
+
+## Installing Latest Development Version
+
+To try the latest features before they are released on PyPI, install Tide directly from the main branch using `uv`:
+
+```bash
+uv add git+https://github.com/tide-robotics/tide.git@main
+```
