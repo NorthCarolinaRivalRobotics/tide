@@ -9,7 +9,10 @@ from tide.config import TideConfig, NodeConfig
 from tide.models.common import Image
 from tide.components.webcam_node import WebcamNode
 
-import cv2
+try:  # pragma: no cover - OpenCV may be missing
+    import cv2
+except Exception:  # pragma: no cover
+    cv2 = None
 
 
 CAM = os.getenv("TEST_CAMERA", "/dev/video0")
@@ -37,7 +40,7 @@ class ImageRecorder(BaseNode):
         pass
 
 
-@pytest.mark.skipif(not os.path.exists(CAM), reason="no V4L2 device in CI")
+@pytest.mark.skipif(cv2 is None or not os.path.exists(CAM), reason="no webcam available")
 def test_webcam_node_integration():
     cfg = TideConfig(
         nodes=[
