@@ -9,7 +9,7 @@ __version__ = "0.1.12"
 
 # Import core components
 from tide.core.node import BaseNode
-from tide.components import PIDNode
+from tide.components import PIDNode, BehaviorTreeNode
 
 # Reserved namespace enums and helpers
 from tide.namespaces import (
@@ -40,4 +40,5 @@ __all__ = [
     "motor_vel",
     "robot_topic",
     "PIDNode",
+    "BehaviorTreeNode",
 ]

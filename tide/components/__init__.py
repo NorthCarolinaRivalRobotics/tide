@@ -5,6 +5,7 @@ from .pose_estimator import PoseEstimatorNode, SE2Estimator, SE3Estimator
 from .webcam_node import WebcamNode
 from .mux_node import MuxNode
 from .rerun_node import RerunNode
+from .behavior_tree_node import BehaviorTreeNode
 
 __all__ = [
     "PIDNode",
@@ -14,4 +15,5 @@ __all__ = [
     "WebcamNode",
     "MuxNode",
     "RerunNode",
+    "BehaviorTreeNode",
 ]
