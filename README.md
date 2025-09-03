@@ -276,5 +276,5 @@ MIT
 To try the latest features before they are released on PyPI, install Tide directly from the main branch using `uv`:
 
 ```bash
-uv add git+https://github.com/tide-robotics/tide.git@main
+uv add git+https://github.com/NorthCarolinaRivalRobotics/tide.git
 ```
