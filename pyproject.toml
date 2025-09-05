@@ -1,6 +1,6 @@
 [project]
 name = "tide-sdk"
-version = "0.1.12"
+version = "0.1.13"
 description = "A Zenoh-based robotics framework with opinionated namespacing"
 readme = "README.md"
 requires-python = ">=3.12"
