@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Union, Callable
 
 import zenoh
+from tide.core.rosbag import record_zenoh_message
 from tide.models.serialization import encode_message, decode_message
 
 class BaseNode(ABC):
@@ -121,6 +122,7 @@ class BaseNode(ABC):
 
         try:
             publisher.put(payload)
+            record_zenoh_message(full_key, payload)
         except Exception as e:
             print(f"Error publishing to {full_key}: {e}")
 

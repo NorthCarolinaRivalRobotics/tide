@@ -105,6 +105,28 @@ For longer discovery times:
 tide status --timeout 5.0
 ```
 
+### Recording and Replaying Sessions
+
+Tide can persist Zenoh traffic to a ROS bag during `tide up` runs and replay it
+later. Set the `TIDE_RECORD_BAG` environment variable to the directory where
+the bag should be created:
+
+```bash
+TIDE_RECORD_BAG=/tmp/tide_run.bag tide up
+```
+
+The path must not exist beforehand; the command creates the bag directory and
+records every published message. To replay a previously captured run, point the
+`TIDE_PLAYBACK_BAG` variable at the bag before invoking `tide up`:
+
+```bash
+TIDE_PLAYBACK_BAG=/tmp/tide_run.bag tide up --config playback_config.yaml
+```
+
+Playback will publish the recorded messages on their original topics in
+real-time, allowing other nodes in the configuration to consume them exactly as
+if they were coming from live hardware.
+
 ## Programming API
 
 ### Defining a Node
