@@ -15,6 +15,12 @@ from rich.table import Table
 
 from tide.core.utils import launch_from_config
 from tide.config import load_config, TideConfig
+from tide.core.rosbag import (
+    RosbagPlayer,
+    RosbagRecorder,
+    clear_active_recorder,
+    set_active_recorder,
+)
 from tide.cli.utils import console
 from tide.core.node import BaseNode
 
@@ -42,6 +48,32 @@ def cmd_up(args, *, run_duration: Optional[float] = None) -> int:
         console.print(f"[bold red]Error:[/bold red] Failed to load configuration: {e}")
         return 1
     
+    record_bag_path = os.getenv("TIDE_RECORD_BAG")
+    playback_bag_path = os.getenv("TIDE_PLAYBACK_BAG")
+
+    recorder: Optional[RosbagRecorder] = None
+    player: Optional[RosbagPlayer] = None
+
+    if record_bag_path:
+        try:
+            recorder = RosbagRecorder(record_bag_path)
+            set_active_recorder(recorder)
+            console.print(f"[bold green]Recording[/bold green] messages to {record_bag_path}")
+        except Exception as exc:
+            console.print(f"[bold red]Error:[/bold red] Failed to open bag for recording: {exc}")
+            return 1
+
+    if playback_bag_path:
+        try:
+            player = RosbagPlayer(playback_bag_path)
+            console.print(f"[bold green]Replaying[/bold green] messages from {playback_bag_path}")
+        except Exception as exc:
+            console.print(f"[bold red]Error:[/bold red] Failed to prepare playback: {exc}")
+            if recorder:
+                recorder.close()
+                clear_active_recorder()
+            return 1
+
     # Show info about the configuration
     console.print("\n[bold]Configuration loaded:[/bold]")
     console.print(f"Session mode: [cyan]{config.session.mode}[/cyan]")
@@ -85,6 +117,21 @@ def cmd_up(args, *, run_duration: Optional[float] = None) -> int:
             except Exception:
                 pass
 
+        if player is not None:
+            try:
+                player.stop()
+                if player.error:
+                    console.print(f"[bold red]Playback error:[/bold red] {player.error}")
+            except Exception:
+                pass
+
+        if recorder is not None:
+            try:
+                recorder.close()
+            except Exception:
+                pass
+            clear_active_recorder()
+
         # Terminate external processes
         for proc in processes:
             try:
@@ -107,6 +154,14 @@ def cmd_up(args, *, run_duration: Optional[float] = None) -> int:
     try:
         # Launch nodes from config
         nodes, processes = launch_from_config(config)
+
+        if player is not None:
+            try:
+                player.start()
+            except Exception as exc:
+                console.print(f"[bold red]Error:[/bold red] Unable to start playback: {exc}")
+                shutdown_handler()
+                return 1
 
         console.print(f"[bold green]Started {len(nodes)} nodes and {len(processes)} scripts.[/bold green]")
         console.print("[italic]Press Ctrl+C to exit.[/italic]")
